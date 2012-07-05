@@ -18,15 +18,17 @@ import aQute.service.library.Library.Importer;
 import aQute.service.library.Library.Revision;
 import aQute.service.library.Library.RevisionRef;
 import aQute.service.reporter.*;
+import aQute.service.store.*;
 
 public class LibraryImporterImpl extends ReporterAdapter implements Library.Importer {
 	final LibraryImpl		parent;
-	String					uniqueId;
+	String					receipt;
 	Callable<InputStream>	getter;
 	boolean					existed;
 	String					path;
 	final URI				url;
 	File					file;
+	boolean					duplicate;
 
 	interface ImporterMessages {
 
@@ -44,7 +46,7 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 
 		ERROR RequiredField_IsNull(String name);
 
-		ERROR InvalidField_Value_(String name, Object field);
+		ERROR InvalidField_Value_Expected(String name, Object field, Pattern pattern);
 
 	}
 
@@ -61,8 +63,18 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 		File file = getFile();
 		String sha = digest(file);
 
-		RevisionImpl revision = parent.revisions.find("_id=%s", sha).one();
+		Cursor<RevisionImpl> cursor;
+		if (receipt != null) {
+			// if the caller has a unique receipt than we can
+			// use it to find a prior import. Obviously this
+			// receipt must be truly unique, like a SHA or so.
+			cursor = parent.revisions.find("|(_id=%s)(receipt=%s)", sha, receipt);
+		} else {
+			cursor = parent.revisions.find("_id=%s", sha);
+		}
+		RevisionImpl revision = cursor.one();
 		if (revision != null) {
+			duplicate = true;
 			messages.AlreadyImported_(url);
 			return revision;
 		}
@@ -145,15 +157,15 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 		check(rev.version.base, "version.base", aQute.lib.osgi.Verifier.VERSION);
 	}
 
-	private void check(Object field, String name, Pattern pattern) {
+	private void check(String field, String name, Pattern pattern) {
 		if (field == null) {
 			messages.RequiredField_IsNull(name);
-
+			return;
 		}
-		if (pattern.matcher(name.toString()).matches())
+		if (pattern.matcher(field).matches())
 			return;
 
-		messages.InvalidField_Value_(name, field);
+		messages.InvalidField_Value_Expected(name, field, pattern);
 	}
 
 	@Override
@@ -171,5 +183,16 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 	@Override
 	public URI getURL() {
 		return url;
+	}
+
+	@Override
+	public boolean isDuplicate() {
+		return duplicate;
+	}
+
+	@Override
+	public Importer receipt(String string) {
+		this.receipt = string;
+		return this;
 	}
 }

@@ -13,7 +13,6 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.impl.gitposthook.Data.ImportData;
 import aQute.libg.reporter.*;
 import aQute.service.email.*;
-import aQute.service.email.Email.EmailRequest;
 import aQute.service.github.*;
 import aQute.service.library.*;
 import aQute.service.library.Library.Revision;
@@ -54,20 +53,41 @@ public class GithubWorker implements Worker<Data.ImportData> {
 
 					StringBuilder sb = new StringBuilder();
 					Formatter format = new Formatter(sb);
-					format.format("%40s %15s %2s %20s %s\n", "Symbolic Name", "Version", "M", "Qual.", "Summary");
+					format.format("Imported from Github, %s, from %s, for repository %s\n\n", new Date(work.time),
+							work.ip, work.posthook.repository.name);
+
+					format.format("%-40s %1s %-15s %-20s %6s %s\n", "Symbolic Name", "M", "Version", "Qualifier",
+							"Errors", "Summary");
+
+					int n = 0;
 
 					for (URI url : uris) {
-						Library.Importer imp = library.importer(url).owner(work.posthook.repository.owner.email)
-								.message("From github repo " + work.posthook.repository.name);
+						Library.Importer imp = library.importer(url)//
+								.owner(work.posthook.repository.owner.email) //
+								.message("From github repo " + work.posthook.repository.name)//
+								.receipt(url.toString());
 						Revision revision = imp.fetch();
 						if (revision != null) {
-							format.format("%40s %15s %2s %4d %s\n", revision.bsn, revision.version.base,
-									revision.master ? 'M' : 'S', imp.getErrors().size(), revision.summary);
+							format.format("%-40s %1s %-15s %-20s %6d %s%s\n", //
+									revision.bsn, //
+									revision.master ? 'm' : ' ', //
+									revision.version.base, //
+									revision.version.qualifier == null ? "" : revision.version.qualifier, //
+									imp.getErrors().size(), //
+									revision.summary == null ? "" : revision.summary, //
+									(imp.isDuplicate() ? "(Was duplicate)" : "")//
+							);
 						} else {
-							format.format("%40s %15s %2s %4d %s\n", "?", "?", "?", imp.getErrors().size(),
-									"Failed to import");
+							format.format("%-40s %1s %-15s %-20s %6d %s\n", //
+									"", // bsn
+									"", // master
+									"", // version base
+									"", // version qualifier
+									imp.getErrors().size(), // errors
+									"Failed to import " + imp.getURL() // summary
+							);
 						}
-						getInfo(imp);
+						getInfo(imp, n++ + ": ");
 					}
 
 					report(sb);
@@ -80,12 +100,11 @@ public class GithubWorker implements Worker<Data.ImportData> {
 								text(sb.toString()).//
 								send();
 					} else {
-						EmailRequest email = smtp.subject("Failure when imported from Github repository %s at",
-								work.posthook.repository.name, new Date());
-
-						email.text(sb.toString()).//
-								to(work.posthook.repository.owner.email). //
-								send();
+						smtp.subject("Failure when imported from Github repository %s at %s",
+								work.posthook.repository.name, new Date()) //
+								.to(work.posthook.repository.owner.email)//
+								.text(sb.toString())//
+								.send();
 					}
 				}
 				catch (Exception e) {

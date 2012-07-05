@@ -88,9 +88,8 @@ public class LibraryImpl implements Library {
 	}
 
 	@Override
-	public Revision getRevision(String bsn, String version) {
-		// TODO Auto-generated method stub
-		return null;
+	public Revision getRevision(String bsn, String version) throws Exception {
+		return revisions.find("&(bsn=%s)(version.base=%s)", bsn, version).one();
 	}
 
 	@Override

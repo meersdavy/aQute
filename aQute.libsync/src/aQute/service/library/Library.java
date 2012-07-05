@@ -50,7 +50,11 @@ public interface Library {
 	}
 
 	public class Revision {
-		public String				_id;												// Unique
+		public String				_id;												// SHA
+																						// of
+																						// file
+		public String				receipt;											// Importer
+																						// receipt
 		public byte[]				previous;											// id
 		public URI					url;
 		public String				bsn;
@@ -195,7 +199,7 @@ public interface Library {
 
 	// void master(RevisionRef rev);
 
-	Revision getRevision(String bsn, String version);
+	Revision getRevision(String bsn, String version) throws Exception;
 
 	interface Importer extends Report {
 		Revision fetch() throws Exception;
@@ -207,6 +211,21 @@ public interface Library {
 		File getFile() throws Exception;
 
 		URI getURL();
+
+		boolean isDuplicate();
+
+		/**
+		 * If the caller has a truly unique id (like a SHA or MD5) for the file
+		 * to parse then this can be given as a unique receipt. The library must
+		 * not import a revision if it already contains a revision with this
+		 * receipt. The importer will have the {@link #isDuplicate()} flag set
+		 * if there was no import.
+		 * 
+		 * @param A
+		 *            unique id for the imported file targeted by the URL.
+		 * @return this
+		 */
+		Importer receipt(String unique);
 	}
 
 	Importer importer(URI url) throws Exception;

@@ -5,6 +5,7 @@ import java.util.regex.*;
 import aQute.bnd.annotation.component.*;
 import aQute.service.library.*;
 import aQute.service.library.Library.Program;
+import aQute.service.library.Library.Revision;
 import aQute.service.rest.*;
 
 @Component
@@ -51,8 +52,8 @@ public class LibraryRestManager implements ResourceManager {
 		return library.getProgram(bsn);
 	}
 
-	public String getShit() {
-		return "shit";
+	public Revision getProgramRevision(String bsn, String version) throws Exception {
+		return library.getRevision(bsn, version);
 	}
 
 	@Reference
