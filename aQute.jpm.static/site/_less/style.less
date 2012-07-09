@@ -69,22 +69,6 @@ h1 {
 	margin-bottom: 4px;
 }
 
-table {
-	width:100%;
- td {
-	width: 3*@cwidth+2*@gutter;
-	vertical-align:top;
-	padding-left:10px;
-	padding-right:10px;
-	&:first-child {
-		padding-left:0;
-	}
-	&:last-child {
-		width:auto;
-		padding-right:0;
-	}
-  }
-}
 
 
 a {
@@ -211,10 +195,32 @@ background-color:#fefefe; background-image: -moz-linear-gradient(top , #fefefe, 
 	}
 }
 
-table, tr, td {
+table, tr, td,th {
 	padding:0;
 	margin: 0;
 	width:100%;
+}
+table {
+	width:100%;
+ td,th {
+	width: 3*@cwidth+2*@gutter;
+	vertical-align:top;
+	padding-left:10px;
+	padding-right:10px;
+	&:first-child {
+		padding-left:0;
+	}
+	&:last-child {
+		width:auto;
+		padding-right:0;
+	}
+  }
+  th {
+	padding: 3px;
+	background-color: lightgray;
+	color: white;
+	text-align: left;
+  }
 }
 
 .share_icon {
@@ -315,16 +321,56 @@ input {
 .staged, .master {
 	display: block;
 	float: left;
-	width: 1*@cwidth;
+	width: @cwidth;
+	height: 16px;
 	margin: 4px;
 	padding: 2px;
+	margin-left: 0px;
 	border:			1px solid lightgray;
 	color: black;
 	background-color:white;
 	.rounded(5px);
+	text-align: center;
+	font-weight: bold;
 }
 
 .master {
 	color: white;
 	background-color:black;
+}
+
+.icon {
+		display: block;
+		float:right;
+		width: 64px;
+		height: 64px;
+		margin: 0px;
+		.rounded(8px);
+		vertical-align:text-top;
+	background-color: gray;
+	padding: 2;
+background: #c9c9c9; /* Old browsers */
+background: -moz-linear-gradient(-45deg,  #c9c9c9 0%, #070707 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, right bottom, color-stop(0%,#c9c9c9), color-stop(100%,#070707)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(-45deg,  #c9c9c9 0%,#070707 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(-45deg,  #c9c9c9 0%,#070707 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(-45deg,  #c9c9c9 0%,#070707 100%); /* IE10+ */
+background: linear-gradient(135deg,  #c9c9c9 0%,#070707 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c9c9c9', endColorstr='#070707',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+	
+}
+
+.developer {
+		width: 32px;
+		height: 32px;
+		.rounded(8px);
+	padding: 2px;
+	magin: 2px;
+	margin-left: 2px;
+	background-color: lightgray;
+}
+
+.qualifier {
+	font-weight: normal;
+	font-style:italic;
 }
