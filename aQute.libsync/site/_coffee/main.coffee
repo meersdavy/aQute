@@ -38,4 +38,7 @@ ProgramCtl = ($scope, $location, $routeParams ) ->
         $scope.revision = Revision.get($routeParams)
     else
         $scope.revision = null
-      
+    $scope.type   = (t) -> 'staged'
+    $scope.date   = (t) -> new Date(t).toString()
+    $scope.icon   = (i) -> i || '/img/default-icon.png'
+    $scope.rescan = () -> $scope.revision.$rescan({bsn:$scope.revision.bsn,rev:$scope.revision.version.base}); 

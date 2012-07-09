@@ -12,7 +12,8 @@ activate = ( $resource, $location, $routeParams ) ->
       'query': {method: 'GET', params:{query:@query,start:@start,limit:PAGE_SIZE}, isArray:true}
     })
     Revision = $resource('/rest/program/:bsn/revision/:rev',{}, {
-      'get': {method:'GET', params: {}}
+      'get': {method:'GET', params: {}},
+      'rescan': {method:'OPTION', params:{cmd:'rescan'}}
     })
     
 angular.module( 'jpm', ['ngResource'] ).config(routes).run( activate )
