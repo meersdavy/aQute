@@ -1,0 +1,6 @@
+Private-Package: aQute.impl.gravatar,\
+	aQute.libg.tuple,\
+	aQute.libg.cryptography,\
+	aQute.lib.hex,\
+	aQute.lib.io
+Service-Component: *
