@@ -27,6 +27,14 @@ public class OSGiMetadataParser extends ReporterAdapter {
 	interface OSGiMetadataParserMessages extends Messages {
 		WARNING NotAnOSGiBundle_(Object url);
 
+		ERROR URI_NotFoundInJar_(String string, String name);
+
+		ERROR InvalidURI_In_(String string, String name);
+
+		ERROR InvalidURI_In_For_(String selected, String name, String message);
+
+		ERROR CouldNotConvertURI_For_(String selected, String name);
+
 		ERROR InvalidHeader_Clause_ForConversionTo_(String header, Attrs value, Type type);
 	}
 
@@ -135,12 +143,47 @@ public class OSGiMetadataParser extends ReporterAdapter {
 		revision.description = domain.get(Constants.BUNDLE_DESCRIPTION);
 		revision.vendor = domain.get(Constants.BUNDLE_VENDOR);
 		revision.docUrl = getURI(jar, domain.get(Constants.BUNDLE_DOCURL));
-		revision.icon = getURI(jar, domain.get(Constants.BUNDLE_ICON));
+		revision.icon = getIcon(jar, domain.getIcon(64), 32 * 1024);
 		revision.summary = domain.get("Bundle-Release");
 		h2d(revision, "scm", "url", domain.get("Bundle-SCM"), "Bundle-SCM");
 		h2d(revision, "licenses", "name", domain.get("Bundle-License"), "Bundle-License");
-		h2d(revision, "developers", "id", domain.get("Bundle-Developer"), "Bundle-Developer");
-		h2d(revision, "contributors", "id", domain.get("Bundle-Contributor"), "Bundle-Contributor");
+		h2d(revision, "developers", "id", domain.get("Bundle-Developers"), "Bundle-Developers");
+		h2d(revision, "contributors", "id", domain.get("Bundle-Contributors"), "Bundle-Contributors");
+	}
+
+	/**
+	 * Find an icon with the requested size in the list of icons. The routine
+	 * assumes the image type is png. TODO move to bndlib?
+	 * 
+	 * @param jar
+	 *            The jar to load from if URI is relative
+	 * @param selected
+	 *            the selected icon
+	 * @param max
+	 *            Maximum nr of bytes in uri
+	 * @return null or a valid URI (potentially a data uri) to the image.
+	 */
+	private URI getIcon(Jar jar, String selected, int max) {
+		if (selected == null)
+			return null;
+
+		try {
+			URI uri = new URI(selected);
+			if (uri.isAbsolute())
+				return uri;
+
+			// TODO check it is really a png image
+
+			uri = jar.getDataURI(selected, "image/png", max);
+			if (uri == null) {
+				msg.CouldNotConvertURI_For_(selected, jar.getName());
+			}
+			return uri;
+		}
+		catch (Exception e) {
+			msg.InvalidURI_In_For_(selected, jar.getName(), e.getMessage());
+		}
+		return null;
 	}
 
 	/**
@@ -160,10 +203,45 @@ public class OSGiMetadataParser extends ReporterAdapter {
 	}
 
 	private URI getURI(Jar jar, String string) {
-		// TODO Auto-generated method stub
+		if (string == null)
+			return null;
+
+		try {
+			URI uri = new URI(string);
+			if (uri.isAbsolute())
+				// TODO check if it exists and is png?
+				return uri;
+
+		}
+		catch (Exception e) {
+			// Ignore
+		}
+		msg.InvalidURI_In_(string, jar.getName());
 		return null;
 	}
 
+	/**
+	 * Convert a header to a list of types for a specific field. Since a header
+	 * is a list of named maps, the name of the map is placed in the map, the id
+	 * parameter specifies the name of the name inside the map. Ok, example.
+	 * 
+	 * <pre>
+	 * Header: a;a=1,b=2,b;x=2
+	 * </pre>
+	 * 
+	 * Assuming id is {@code nom} then this will result in
+	 * <code>[ {nom=a, a=1, b=2},
+	 * {nom=b, x=2}]</code>.
+	 * 
+	 * @param target
+	 *            the target object
+	 * @param field
+	 *            the field to set (must be a list)
+	 * @param id
+	 *            the id of the name part of the header in the attrs map
+	 * @param spec
+	 * @param header
+	 */
 	public <T> void h2d(T target, String field, String id, String spec, String header) {
 		if (spec == null)
 			return;

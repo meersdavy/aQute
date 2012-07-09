@@ -2,23 +2,23 @@ package aQute.impl.library;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
 
 import aQute.impl.library.LibraryImpl.ProgramImpl;
 import aQute.impl.library.LibraryImpl.RevisionImpl;
-import aQute.lib.data.*;
 import aQute.lib.io.*;
 import aQute.libg.cryptography.*;
 import aQute.libg.reporter.Messages.ERROR;
-import aQute.libg.reporter.Messages.WARNING;
 import aQute.libg.reporter.*;
 import aQute.service.library.*;
 import aQute.service.library.Library.Importer;
 import aQute.service.library.Library.Revision;
 import aQute.service.library.Library.RevisionRef;
 import aQute.service.reporter.*;
-import aQute.service.store.*;
+
+// TODO lock import name
 
 public class LibraryImporterImpl extends ReporterAdapter implements Library.Importer {
 	final LibraryImpl		parent;
@@ -36,13 +36,11 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 
 		ERROR AlreadyImported_(String uniqueId);
 
-		ERROR Revision__ExistsAsMaster(String bsn, String version);
+		ERROR Revision_ExistsAsMaster(String id);
 
 		ERROR Revision_EqualsSameVersion_AsAlreadyImportedFrom_(String bsn, String version, String url);
 
 		ERROR Revision_OlderVersion_AsAlreadyImportedFrom_(String bsn, String version, URL url);
-
-		WARNING AlreadyImported_(URI url);
 
 		ERROR RequiredField_IsNull(String name);
 
@@ -53,6 +51,7 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 	final ImporterMessages	messages	= ReporterMessages.base(this, ImporterMessages.class);
 	String					owner;
 	String					message;
+	private boolean			rescan;
 
 	public LibraryImporterImpl(LibraryImpl parent, URI url) {
 		this.parent = parent;
@@ -60,29 +59,37 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 	}
 
 	public Revision fetch() throws Exception {
+		if (!rescan) {
+			// If the caller set a receipt (a unique id)
+			// we see if we already imported this.
+
+			if (receipt != null) {
+				RevisionImpl prior = parent.revisions.find("receipt=%s", receipt).one();
+				if (prior != null) {
+					duplicate = true;
+					return prior;
+				}
+			}
+		}
+
 		File file = getFile();
 		String sha = digest(file);
 
-		Cursor<RevisionImpl> cursor;
-		if (receipt != null) {
-			// if the caller has a unique receipt than we can
-			// use it to find a prior import. Obviously this
-			// receipt must be truly unique, like a SHA or so.
-			cursor = parent.revisions.find("|(_id=%s)(receipt=%s)", sha, receipt);
-		} else {
-			cursor = parent.revisions.find("_id=%s", sha);
-		}
-		RevisionImpl revision = cursor.one();
-		if (revision != null) {
+		// if the caller has a unique receipt than we can
+		// use it to find a prior import. Obviously this
+		// receipt must be truly unique, like a SHA or so.
+
+		RevisionImpl revision = parent.revisions.find("sha=%s", sha).one();
+		if (revision != null && !rescan) {
 			duplicate = true;
-			messages.AlreadyImported_(url);
 			return revision;
 		}
 
 		revision = new RevisionImpl();
-		revision._id = sha;
+		revision.receipt = receipt;
 		revision.url = url;
-		revision.owner = owner;
+		revision.sha = sha;
+		revision.owner = owner == null ? "rescan" : owner;
 		revision.message = message;
 
 		for (MetadataProvider md : parent.mdps) {
@@ -96,15 +103,19 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 		if (!isOk())
 			return null;
 
-		// TODO classifier
-		RevisionImpl previous = parent.revisions
-				.find("&(bsn=%s)(version.base=%s)", revision.bsn, revision.version.base).one();
-		if (previous != null && previous.master) {
-			messages.Revision__ExistsAsMaster(revision.bsn, revision.version.base);
-			return null;
-		}
+		revision.insertDate = System.currentTimeMillis();
+		revision._id = getId(revision);
 
-		parent.revisions.insert(revision);
+		// TODO classifier
+		RevisionImpl previous = parent.revisions.find("_id=%s", revision._id).one();
+		if (previous != null) {
+			if (previous.master) {
+				messages.Revision_ExistsAsMaster(revision._id);
+				return null;
+			}
+			parent.revisions.update(revision); // TODO what to do with previous
+		} else
+			parent.revisions.insert(revision);
 
 		ProgramImpl program = parent.programs.find("_id=%s", revision.bsn).one();
 		RevisionRef reference = new RevisionRef(revision);
@@ -112,23 +123,38 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 		if (program == null) {
 			program = new ProgramImpl();
 			program._id = revision.bsn;
-			data.assignIfNotSet(revision, program, "docUrl", "vendor", "description", "icon");
 			program.revisions.add(reference);
 			parent.programs.insert(program);
 		} else {
-			program.revisions.remove(reference);
+			Iterator<RevisionRef> i = program.revisions.iterator();
+			while (i.hasNext()) {
+				RevisionRef ref = i.next();
+				if (isRef(ref, revision)) {
+					i.remove();
+					program.history.add(ref);
+				}
+			}
 			program.revisions.add(0, reference);
 			program.lastImport = reference.revision;
 
 			int n = parent.programs //
 					.find(program) //
-					.set("revisions", program.revisions) //
-					.set("lastImport", program.lastImport) //
+					.set("revisions") //
+					.set("lastImport") //
+					.set("history") //
 					.update();
 			if (n != 1)
 				error("Could not update program %s in database, count was %d", program._id, n);
 		}
 		return revision;
+	}
+
+	private boolean isRef(RevisionRef next, RevisionImpl revision) {
+		return next.revision.equals(revision._id);
+	}
+
+	private String getId(RevisionImpl revision) {
+		return revision.bsn + "-" + revision.version.base;
 	}
 
 	private String digest(File file) throws Exception {
@@ -193,6 +219,18 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 	@Override
 	public Importer receipt(String string) {
 		this.receipt = string;
+		return this;
+	}
+
+	@Override
+	public Importer trace(boolean trace) {
+		setTrace(trace);
+		return this;
+	}
+
+	@Override
+	public Importer rescan() {
+		rescan = true;
 		return this;
 	}
 }

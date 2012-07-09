@@ -32,6 +32,7 @@ public class Validator extends ReporterAdapter {
 		Cache cache = data.getCache(object.getClass());
 		for (Field f : cache.fs) {
 			Require req = f.getAnnotation(Require.class);
+			Match match = f.getAnnotation(Match.class);
 			Semantics semantics = f.getAnnotation(Semantics.class);
 			String description = "";
 			if (semantics != null)
@@ -60,12 +61,10 @@ public class Validator extends ReporterAdapter {
 						s = map.size() + "";
 					}
 
-					for (Match m : req.value()) {
-						if (s == null)
-							s = value.toString();
+					if (s == null)
+						s = value.toString();
 
-						match(m, s, prefix);
-					}
+					match(match, s, prefix);
 				}
 			}
 		}

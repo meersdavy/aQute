@@ -56,6 +56,15 @@ public class LibraryRestManager implements ResourceManager {
 		return library.getRevision(bsn, version);
 	}
 
+	interface OptionOptions extends Options {
+		String cmd();
+	}
+
+	public Revision optionProgramRevision(OptionOptions opts, String bsn, String version) throws Exception {
+		// Authorize?
+		return library.rescan(bsn, version);
+	}
+
 	@Reference
 	void setLibrary(Library lib) {
 		this.library = lib;

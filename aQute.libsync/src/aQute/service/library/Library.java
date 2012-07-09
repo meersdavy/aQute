@@ -16,37 +16,6 @@ public interface Library {
 		public String	qualifier;
 		public String	classifier;
 		public String	original;
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((base == null) ? 0 : base.hashCode());
-			result = prime * result + ((classifier == null) ? 0 : classifier.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Version other = (Version) obj;
-			if (base == null) {
-				if (other.base != null)
-					return false;
-			} else if (!base.equals(other.base))
-				return false;
-			if (classifier == null) {
-				if (other.classifier != null)
-					return false;
-			} else if (!classifier.equals(other.classifier))
-				return false;
-			return true;
-		}
 	}
 
 	public class Revision {
@@ -55,8 +24,8 @@ public interface Library {
 																						// file
 		public String				receipt;											// Importer
 																						// receipt
-		public byte[]				previous;											// id
 		public URI					url;
+		public String				sha;
 		public String				bsn;
 		public Version				version;
 		public boolean				updated;
@@ -145,37 +114,6 @@ public interface Library {
 		public String	release;
 		public String	summary;
 		public boolean	updated;
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((bsn == null) ? 0 : bsn.hashCode());
-			result = prime * result + ((version == null) ? 0 : version.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			RevisionRef other = (RevisionRef) obj;
-			if (bsn == null) {
-				if (other.bsn != null)
-					return false;
-			} else if (!bsn.equals(other.bsn))
-				return false;
-			if (version == null) {
-				if (other.version != null)
-					return false;
-			} else if (!version.equals(other.version))
-				return false;
-			return true;
-		}
 	}
 
 	class Program {
@@ -190,6 +128,7 @@ public interface Library {
 		public String				description;
 		public URI					icon;
 		public String				lastImport;
+		public List<RevisionRef>	history		= new ArrayList<RevisionRef>();
 		public Map<String,Object>	__extra;
 	}
 
@@ -226,7 +165,13 @@ public interface Library {
 		 * @return this
 		 */
 		Importer receipt(String unique);
+
+		Importer trace(boolean b);
+
+		Importer rescan();
 	}
 
 	Importer importer(URI url) throws Exception;
+
+	Revision rescan(String bsn, String version) throws Exception;
 }

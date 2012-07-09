@@ -117,4 +117,13 @@ public class LibraryImpl implements Library {
 	void setFileCache(FileCache cache) {
 		this.fileCache = cache;
 	}
+
+	@Override
+	public Revision rescan(String bsn, String version) throws Exception {
+		Revision rev = getRevision(bsn, version);
+		if (rev == null)
+			return null;
+
+		return importer(rev.url).message("rescan").rescan().fetch();
+	}
 }

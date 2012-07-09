@@ -1,18 +1,17 @@
 <div class="ng-cloak">
 	<div>
-		<h2>{{program._id}}</h2>
+		<h2>
+			{{program._id}}<img class="icon" ng-src="{{icon(program.icon)}}" />
+		</h2>
 		<table style="width: 100%">
-			<tr>
-				<td class="label">Name</td>
-				<td>{{program._id}}</td>
-			</tr>
 			<tr>
 				<td class="label">Description</td>
 				<td>{{program.description}}</td>
 			</tr>
 			<tr>
 				<td class="label">Vendor</td>
-				<td>{{program.vendor}}</td>
+				<td><input ng-disabled="true" type="text"
+					ng-model="program.vendor" /></td>
 			</tr>
 			<tr>
 				<td class="label">Mailing list</td>
@@ -24,24 +23,93 @@
 			</tr>
 			<tr>
 				<td class="label">Revisions</td>
-				<td><a class="{{type(r)}}" ng-repeat="r in program.revisions"
-					href="#/p/{{program._id}}/r/{{r.version.base}}">{{r.version.base}}</a>
-				</td>
+				<td><a class="{{type(ref)}}" ng-repeat="ref in program.revisions"
+			href="#/p/{{program._id}}/r/{{ref.version.base}}">{{ref.version.base}}</a></td>
 			</tr>
 		</table>
+		<p></p>
 	</div>
-	<hr />
-	<div ng-hide="!revision.version.base">
-
-		<h3>{{revision.version.base + " " + revison.version.qualifier}}</h3>
+	<div style="clear:both;" ng-hide="!revision.version.base">
+		<hr/>
+		<h3><img class="icon"
+				ng-src="{{icon(revision.icon)}}" /><a class="{{type(revision)}}" >{{revision.version.base }}</a></h3> 
+		<button ng-hide="revision.master" ng-click="rescan()">Rescan</button>
+		<table style="width: 100%" ng-include src="'/rest/form/revision'"/>
 		<table style="width: 100%">
 			<tr>
 				<td class="label">Description</td>
 				<td>{{revision.description}}</td>
 			</tr>
 			<tr>
+				<td class="label">Qualifier</td>
+				<td>{{revision.version.qualifier}}</td>
+			</tr>
+			<tr>
+				<td class="label">Revision Summary</td>
+				<td>{{revision.summary}}</td>
+			</tr>
+			<tr>
 				<td class="label">Vendor</td>
 				<td>{{revision.vendor}}</td>
+			</tr>
+			<tr>
+				<td class="label">Documentation</td>
+				<td><a ng-hide="!revision.docUrl" ng-href="{{revision.docUrl}}">{{revision.docUrl}}</a></td>
+			</tr>
+			<tr>
+				<td class="label">Mailing list</td>
+				<td>{{revision.mailingList}}</td>
+			</tr>
+			<tr>
+				<td class="label">License(s)</td>
+				<td>
+					<div class='license' ng-repeat="l in revision.licenses">
+						<a ng-href="{{l.link || l.name}}">{{l.description || l.name}}</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">Categories</td>
+				<td>{{revision.categories}}</td>
+			</tr>
+			<tr>
+				<td class="label">Developers</td>
+				<td><img ng-repeat="d in revision.developers" title="{{d.id}}"
+					class="developer" ng-src="/rest/gravatar/{{d.id}}?s=32" /></td>
+			</tr>
+			<tr>
+				<td class="label">Contributors</td>
+				<td><img ng-repeat="d in revision.contributors"
+					title="{{d.id}}" class="developer"
+					ng-src="/rest/gravatar/{{d.id}}?s=32" /></td>
+			</tr>
+			<tr>
+				<th colspan="2">Import data</th>
+			</tr>
+			<tr>
+				<td class="label">Used file (sha)</td>
+				<td><a ng-href="{{revision.url}}">{{revision.sha}}</a></td>
+			</tr>
+			<tr>
+				<td class="label">Source control</td>
+				<td>{{revision.scm.url}} {{revision.tag}}</td>
+			</tr>
+			<tr>
+				<td class="label">Updated</td>
+				<td>{{revision.updated}}</td>
+			</tr>
+			<tr>
+				<td class="label">Parse Date</td>
+				<td>{{date(revision.insertDate)}}</td>
+			</tr>
+			<tr>
+				<td class="label">Message</td>
+				<td>{{revision.message}}</td>
+			</tr>
+			<tr>
+				<td class="label">Importer</td>
+				<td ng-hide="!revision.owner"><img title="{{revision.owner}}"
+					class="developer" ng-src="/rest/gravatar/{{revision.owner}}?s=32" /></td>
 			</tr>
 		</table>
 	</div>

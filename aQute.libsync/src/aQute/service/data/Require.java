@@ -6,6 +6,4 @@ import java.lang.annotation.*;
 @Target({
 		ElementType.FIELD, ElementType.METHOD
 })
-public @interface Require {
-	Match[] value() default {};
-}
+public @interface Require {}

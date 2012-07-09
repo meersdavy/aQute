@@ -1,5 +1,6 @@
 Service-Component: *
-Private-Package: aQute.lib.json,\
+Private-Package: aQute.lib.htmlform,\
+	aQute.lib.json,\
 	aQute.impl.library,\
 	aQute.service.data,\
 	aQute.impl.libsync.web,\
@@ -14,3 +15,5 @@ Export-Package: aQute.service.library,\
 	aQute.service.osgimetadata
 
 Include-Resource: static=generated/site
+
+Conditional-Package: !aQute.lib.osgi, aQute.lib*

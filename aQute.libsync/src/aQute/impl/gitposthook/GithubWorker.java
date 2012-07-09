@@ -62,10 +62,14 @@ public class GithubWorker implements Worker<Data.ImportData> {
 					int n = 0;
 
 					for (URI url : uris) {
+						if (isTrace())
+							System.out.println(url);
+
 						Library.Importer imp = library.importer(url)//
 								.owner(work.posthook.repository.owner.email) //
 								.message("From github repo " + work.posthook.repository.name)//
-								.receipt(url.toString());
+								.receipt(url.toString())//
+								.trace(true);
 						Revision revision = imp.fetch();
 						if (revision != null) {
 							format.format("%-40s %1s %-15s %-20s %6d %s%s\n", //

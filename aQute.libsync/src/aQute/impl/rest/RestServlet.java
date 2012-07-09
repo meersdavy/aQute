@@ -14,6 +14,7 @@ import org.osgi.service.log.*;
 import aQute.bnd.annotation.component.*;
 import aQute.lib.collections.*;
 import aQute.lib.converter.*;
+import aQute.lib.io.*;
 import aQute.lib.json.*;
 import aQute.service.rest.*;
 
@@ -77,6 +78,8 @@ public class RestServlet extends HttpServlet {
 				return;
 
 			}
+			rsp.setContentType("application/json;charset=utf-8");
+
 			for (Function f : functions) {
 
 				Object[] args = mapArguments(f.method.getGenericParameterTypes(), parameters, parts,
@@ -84,20 +87,29 @@ public class RestServlet extends HttpServlet {
 
 				if (args != null) {
 					Object result = f.method.invoke(f.target, args);
-					if (result == null) {
+					if (result == null && f.method.getReturnType() != void.class) {
 						rsp.getWriter().println(
 								"Cannot " + verb + " Resource " + pathInfo + " with parameters " + parameters + ".");
 						rsp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 						return;
 					}
-					rsp.setContentType("application/json;charset=utf-8");
+
 					// TODO test if buffering and then setting length is faster
 					OutputStream out = rsp.getOutputStream();
 					if (deflate) {
 						out = new DeflaterOutputStream(out);
 						rsp.setHeader("Content-Encoding", "deflate");
 					}
-					codec.enc().to(out).put(result).flush();
+					if (result != null) {
+						if (result instanceof InputStream) {
+							IO.copy((InputStream) result, out);
+						} else if (result instanceof byte[]) {
+							byte[] data = (byte[]) result;
+							rsp.setContentLength(data.length);
+							out.write(data);
+						} else
+							codec.enc().to(out).put(result).flush();
+					}
 					out.close();
 					return;
 				}
@@ -167,7 +179,7 @@ public class RestServlet extends HttpServlet {
 			if (name.equals("getClass") && m.getParameterTypes().length == 0)
 				continue;
 
-			if (name.matches("(get|post|delete|options|put|head|trace)[A-Z].+")) {
+			if (name.matches("(get|post|delete|option|put|head|trace)[A-Z].+")) {
 				Function f = new Function(resourceManager, m);
 				functions.add(name, f);
 			}
