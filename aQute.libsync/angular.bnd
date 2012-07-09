@@ -1,0 +1,11 @@
+Private-Package: aQute.impl.angular,\
+	aQute.lib.htmlform,\
+	aQute.lib.tag,\
+	aQute.lib.data,\
+	aQute.lib.converter,\
+	aQute.lib.json,\
+	aQute.libg.reporter,\
+	aQute.lib.base64,\
+	aQute.libg.generics
+Export-Package: aQute.service.angular
+Service-Component: *
