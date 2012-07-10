@@ -31,7 +31,8 @@
 	aQute.libsync.angular;version=latest,\
 	aQute.libsync.data;version=latest,\
 	aQute.libsync.usermanager;version=latest,\
-	aQute.libsync.browserid;version=latest
+	aQute.libsync.browserid;version=latest,\
+	aQute.epiceditor;version=latest
 
 -runproperties: felix.cm.dir=/var/cm,\
 	org.osgi.framework.system.packages.extra=javax.management,\

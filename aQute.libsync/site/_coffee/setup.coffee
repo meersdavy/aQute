@@ -20,4 +20,28 @@ activate = ( $resource, $location, $routeParams ) ->
       'logout': {method: 'GET', params:{}},
     })
     
-angular.module( 'jpm', ['ngResource'] ).config(routes).run( activate )
+JPMApp = angular.module( 'jpm', ['ngResource'] ).config(routes).run( activate )
+
+f = () ->
+    alert(1)
+    return (scope,element,attrs) ->
+        alert(2) 
+        editor=new EpicEditor({container: element.id, file: {defaultContent: 'edit me ...', autoSave: 1000}}).load()
+        scope.$watch(attrs.ngModel, (value) -> editor.importFile('x', value))
+        editor.on('save', () -> scope.program.description = editor.exportFile(); scope.$apply() );
+        
+JPMApp.directive('ee', () -> {
+     restrict: 'A', 
+     require: 'ngModel', 
+     link: (scope, element, attrs, ngModel) ->
+          editor = new EpicEditor({container: element.id, file: {autoSave:1000} }).load()
+          editor.preview();
+          read = () -> ngModel.$setViewValue(editor.exportFile())
+          ngModel.$render = () -> editor.importFile('x', ngModel.$viewValue || '')
+          editor.on('save', () -> scope.$apply(read) )
+          skip = true
+          read(); 
+     })
+      
+      
+

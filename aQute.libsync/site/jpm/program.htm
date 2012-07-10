@@ -1,12 +1,12 @@
 <div class="ng-cloak">
 	<div>
 		<h2>
-			{{program._id}}</br><button ng-show="user" click="alert(1)">Edit</button>
+			{{program._id}}</br><button ng-show="user" ng-click="startEdit()">Edit</button>
 		</h2>
 		<table style="width: 100%">
 			<tr>
-				<td class="label">Description</td>
-				<td>{{program.description}}</td>
+				<td class="label">Description <input type="text" ng-model="program.description"/></td>
+				<td><div id="epiceditor" ng-model="program.description" ee>{{program.description}}xxx</div></td>
 			</tr>
 			<tr>
 				<td class="label">Vendor</td>
@@ -41,7 +41,7 @@
 		<hr/>
 		<h3><img class="icon"
 				ng-src="{{icon(revision.icon)}}" /><a class="{{type(revision)}}" >{{revision.version.base }}</a></h3> 
-		<button ng-hide="revision.master" ng-show="user" ng-click="rescan()">Rescan</button>
+		<button ng-hide="revision.master || !user" ng-click="rescan()">Rescan</button>
 		<table style="width: 100%">
 			<tr>
 				<td class="label">Description</td>

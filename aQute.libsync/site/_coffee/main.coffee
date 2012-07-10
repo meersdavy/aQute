@@ -8,7 +8,6 @@ Revision 	= undefined		# shared resource manager for revisions
 User 	    = undefined		# User management
 
 
-
 window.JPM = ($scope, $location, $routeParams) ->
     window.title = "JPM"
     #
@@ -28,7 +27,7 @@ window.JPM = ($scope, $location, $routeParams) ->
     $scope.email = -> aler(1); user.email
     
     $scope.escape = (s) -> encodeURIComponent(s)
-
+	
 #
 # Searching
 #
@@ -65,5 +64,5 @@ ProgramCtl = ($scope, $location, $routeParams ) ->
     $scope.date   = (t) -> new Date(t).toString()
     $scope.icon   = (i) -> i || '/img/default-icon.png'
     $scope.rescan = ( ) -> $scope.revision.$rescan({bsn:$scope.revision.bsn,rev:$scope.revision.version.base}); 
-    $scope.goto   = (link) -> location.path(link)
+    $scope.startEdit   = ( ) -> $scope.editing = true
     
