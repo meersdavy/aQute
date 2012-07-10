@@ -25,6 +25,7 @@ public class LibraryFormProvider implements FormProvider {
 		HtmlFormBuilder hb = new HtmlFormBuilder(Revision.class).remove("_").remove("logo").id("revision")
 				.title("Revision");
 		hb.entry("insertDate").filter("date:'medium'");
+		hb.entry("sha").link("url");
 		return hb.form();
 	}
 

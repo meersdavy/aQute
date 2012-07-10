@@ -10,4 +10,5 @@ public class Entry {
 	public boolean	readOnly;
 	public String	customEdit;
 	public String	customView;
+	public String	link;
 }

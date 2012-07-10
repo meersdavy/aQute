@@ -9,7 +9,7 @@
 
 	<xsl:template match="/">
 		<xsl:param name="path" />
-		<html lang="en">
+		<html lang="en" ng-app="jpm">
 			<head>
 				<meta charset="utf-8" />
 				<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -22,37 +22,36 @@
 				</title>
 			</head>
 
-			<body>
-				<!-- Facebook -->
-				<div id="fb-root"></div>
-				<script>(function(d, s, id) {
-				  var js, fjs = d.getElementsByTagName(s)[0];
-				  if (d.getElementById(id)) return;
-				  js = d.createElement(s); js.id = id;
-				  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
-				  fjs.parentNode.insertBefore(js, fjs);
-				}(document, 'script', 'facebook-jssdk'));
-				</script>
-
+			<body ng-controller="JPM">
+								    <img class="xuser" ng-src="/rest/gravatar/{{user.email}}?s=16" /> {{user.email}}
+			
 				<div id="nav">
 					<ul>
 						<li>
 							<!-- Reserved for logo -->
-							<a href="index.html">&#160;</a>
+							<a id="logo" href="index.html">&#160;</a>
 						</li>
 						<li>
-							<a href="jpm.html#/">Browse</a>
+							<a href="#/doc/install">Install</a>
 						</li>
 						<li>
-							<a href="install.html">Install</a>
+							<a href="#/doc/about">About</a>
 						</li>
 						<li>
-							<a href="about.html">About</a>
+							<input type='text' ng-model="query" required="true" />
+							<button ng-click="search(query)" ng-disabled="!canSearch()">Go</button>
 						</li>
 						<li>
-							<!-- Last child is search box -->
-							Search
-							<input type="text" />
+							<div class="ng-cloak">
+								<span ng-show="user">
+								    <img class="xuser" ng-src="/rest/gravatar/{{user.email}}?s=16" /> 
+									{{user.email}}
+									<a ng-click="logout()">Logout</a>
+								</span>
+								<span ng-hide="user">
+									<a ng-click="login()">Login</a>
+								</span>
+							</div>
 						</li>
 					</ul>
 				</div>
@@ -137,6 +136,11 @@
 						</ul>
 					</div>
 				</div>
+
+				<script src="https://browserid.org/include.js" type="text/javascript" />
+				<script src="js/angular-1.0.0.js" type="text/javascript" />
+				<script src="js/angular-resource-1.0.0.js" type="text/javascript" />
+				<script src="js/jpm.js" type="text/javascript" />
 			</body>
 		</html>
 	</xsl:template>

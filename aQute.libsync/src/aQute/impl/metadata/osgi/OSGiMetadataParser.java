@@ -8,10 +8,10 @@ import java.util.Map.Entry;
 import java.util.jar.*;
 import java.util.zip.*;
 
+import aQute.bnd.header.*;
+import aQute.bnd.osgi.*;
+import aQute.bnd.osgi.Descriptors.PackageRef;
 import aQute.lib.data.*;
-import aQute.lib.osgi.*;
-import aQute.lib.osgi.Descriptors.PackageRef;
-import aQute.libg.header.*;
 import aQute.libg.reporter.*;
 import aQute.service.library.*;
 import aQute.service.library.Library.PackageDef;
@@ -78,7 +78,7 @@ public class OSGiMetadataParser extends ReporterAdapter {
 
 			revision.packages = new ArrayList<Library.PackageDef>();
 
-			for (Entry<PackageRef,Attrs> e : analyzer.getImports().entrySet()) {
+			for (Entry<PackageRef,aQute.bnd.header.Attrs> e : analyzer.getImports().entrySet()) {
 				PackageDef pd = new PackageDef();
 				pd.type = PackageType.IMPORT;
 				pd.name = e.getKey().getFQN();

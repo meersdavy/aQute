@@ -96,10 +96,17 @@ public class HtmlFormBuilder {
 			return this;
 		}
 
+		public EntryBuilder link(String field) {
+			this.entry.link = field;
+			remove(field);
+			return this;
+		}
+
 		HtmlFormBuilder add() {
 			form.entries.add(entry);
 			return HtmlFormBuilder.this;
 		}
+
 	}
 
 	public EntryBuilder entry(String id) {

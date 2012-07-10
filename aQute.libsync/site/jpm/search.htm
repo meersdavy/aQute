@@ -5,7 +5,7 @@
 		<tr>
 			<td class="label">Search</td>
 			<td><input type='text' ng-model="query" required />
-				<button ng-click="search()" ng-disabled="!canSearch()">Go</button></td>
+				<button ng-click="search()" ng-disabled="!query">Go</button></td>
 		</tr>
 	</table>
 </form>
@@ -18,7 +18,7 @@
 
 <table>
 	<tr ng-repeat="p in programs">
-		<td class="label"><a href="#/p/{{p._id}}?">{{p._id}}</a></td>
-		<td>{{p.description}}</td>
+		<td class="label"><a href="#/p/{{p._id}}/r/{{p.revisions[0].version.base}}?">{{p._id}}</a></td>
+		<td>{{p.description || p.revisions[0]}}</td>
 	</tr>
 </table>

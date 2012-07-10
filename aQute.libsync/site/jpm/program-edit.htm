@@ -1,0 +1,32 @@
+<div class="ng-cloak">
+	<div>
+		<h2>
+			{{program._id}}</br><button ng-show="user" click="alert(1)">Edit</button>
+		</h2>
+		<table style="width: 100%">
+			<tr>
+				<td class="label">Description</td>
+				<td>{{program.description}}</td>
+			</tr>
+			<tr>
+				<td class="label">Vendor</td>
+				<td>{{program.vendor}}</td>
+			</tr>
+			<tr>
+				<td class="label">Mailing list</td>
+				<td>{{program.mailingList}}</td>
+			</tr>
+			<tr>
+				<td class="label">Source control</td>
+				<td>{{program.scm}}</td>
+			</tr>
+			<tr>
+				<td class="label">Revisions</td>
+				<td><a class="{{type(ref)}}" ng-repeat="ref in program.revisions"
+			href="#/p/{{program._id}}/r/{{ref.version.base}}">{{ref.version.base}}</a></td>
+			</tr>
+		</table>
+		<p></p>
+	</div>
+	
+</div>

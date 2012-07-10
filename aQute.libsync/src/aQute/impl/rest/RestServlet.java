@@ -17,6 +17,7 @@ import aQute.lib.converter.*;
 import aQute.lib.io.*;
 import aQute.lib.json.*;
 import aQute.service.rest.*;
+import aQute.service.user.*;
 
 @Component(provide = Servlet.class, properties = {
 	"alias=/rest"
@@ -24,12 +25,14 @@ import aQute.service.rest.*;
 @SuppressWarnings({
 		"unchecked", "rawtypes"
 })
-public class RestServlet extends HttpServlet {
+public class RestServlet extends HttpServlet implements ResourceManager {
 	private static final long	serialVersionUID	= 1L;
 	final static Converter		converter			= new Converter();
 	final static JSONCodec		codec				= new JSONCodec();
 	LogService					log;
 	MultiMap<String,Function>	functions			= new MultiMap<String,Function>();
+	Authenticator				authenticator;
+	UserManager					um;
 
 	class Function {
 		Method	method;
@@ -39,6 +42,10 @@ public class RestServlet extends HttpServlet {
 			this.target = target;
 			this.method = method;
 		}
+	}
+
+	public RestServlet() {
+		addResourceManager(this);
 	}
 
 	public void service(HttpServletRequest rq, HttpServletResponse rsp) throws IOException {
@@ -67,6 +74,7 @@ public class RestServlet extends HttpServlet {
 		Map parameters = new HashMap(rq.getParameterMap());
 
 		parameters.put("_request", rq);
+		parameters.put("_host", rq.getHeader("Host"));
 		parameters.put("_response", rsp);
 
 		try {
@@ -167,6 +175,32 @@ public class RestServlet extends HttpServlet {
 		return null;
 	}
 
+	interface LoginOptions extends Options {
+		String email();
+
+		String assertion();
+	}
+
+	public User getLogin(LoginOptions opts) throws Exception {
+		String email = authenticator.authenticate(opts.email(), opts._host(), opts.assertion());
+
+		if (email != null) {
+			User user = um.getUser(email);
+			if (user == null) {
+				user = new User();
+				user.email = email;
+				opts._request().getSession().setAttribute("user", user);
+			}
+			return user;
+		} else {
+			return null;
+		}
+	}
+
+	public void getLogout(Options opts) throws Exception {
+		opts._request().getSession().removeAttribute("user");
+	}
+
 	@Reference
 	void setLog(LogService log) throws ServletException, NamespaceException {
 		this.log = log;
@@ -193,5 +227,15 @@ public class RestServlet extends HttpServlet {
 			if (f.target == resourceManager)
 				i.remove();
 		}
+	}
+
+	@Reference
+	void setUM(UserManager um) {
+		this.um = um;
+	}
+
+	@Reference
+	void setAuthenticator(Authenticator auth) {
+		this.authenticator = auth;
 	}
 }

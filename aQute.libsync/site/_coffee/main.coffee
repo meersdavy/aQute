@@ -5,22 +5,45 @@
 PAGE_SIZE 	= 10				# Default page size
 Program 	= undefined		# shared resource manager for programs
 Revision 	= undefined		# shared resource manager for revisions
+User 	    = undefined		# User management
+
+
+
+window.JPM = ($scope, $location, $routeParams) ->
+    window.title = "JPM"
+    #
+    #  User/login/logout
+    #
+    $scope.user 	= angular.fromJson( sessionStorage.user || null )
+    $scope.login 	= () -> navigator.id.get(gotAssertion)    
+    $scope.logout 	= () -> $scope.user = null; sessionStorage.user=null; navigator.id.logout()
+    
+    #
+    # Callback from browserid
+    #
+    gotAssertion = (assertion) -> 
+        $scope.user = User.login({assertion:assertion,email:''}, 
+            (user) -> sessionStorage.user = angular.toJson(user))
+
+    $scope.email = -> aler(1); user.email
+    
+    $scope.escape = (s) -> encodeURIComponent(s)
 
 #
-# Controller for the search fragment
+# Searching
 #
+    
 SearchCtl = ($scope, $location, $routeParams ) ->
     $scope.start 	 = $routeParams.start || 0
     $scope.query     = $routeParams.q || ""
     if ($scope.query )
         $scope.programs = Program.query({query:$scope.query,start:$scope.start})
     
-    $scope.canSearch= -> $scope.query
-    
     $scope.search 			= -> 
         $scope.start = 0 unless 0 <= $scope.start <= 100000;
         $location.search("q=#{escape($scope.query)}&start=#{$scope.start}")
         
+
     $scope.next             = ->
         $location.search("q=#{escape($scope.query)}&start=#{$scope.start+PAGE_SIZE}")
         
@@ -41,4 +64,6 @@ ProgramCtl = ($scope, $location, $routeParams ) ->
     $scope.type   = (t) -> 'staged'
     $scope.date   = (t) -> new Date(t).toString()
     $scope.icon   = (i) -> i || '/img/default-icon.png'
-    $scope.rescan = () -> $scope.revision.$rescan({bsn:$scope.revision.bsn,rev:$scope.revision.version.base}); 
+    $scope.rescan = ( ) -> $scope.revision.$rescan({bsn:$scope.revision.bsn,rev:$scope.revision.version.base}); 
+    $scope.goto   = (link) -> location.path(link)
+    

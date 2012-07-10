@@ -175,12 +175,12 @@ public class LibraryImporterImpl extends ReporterAdapter implements Library.Impo
 	 * @param rev
 	 */
 	private void verify(Revision rev) {
-		check(rev.bsn, "bsn", aQute.lib.osgi.Verifier.SYMBOLICNAME);
+		check(rev.bsn, "bsn", aQute.bnd.osgi.Verifier.SYMBOLICNAME);
 		if (rev.version == null) {
 			messages.RequiredField_IsNull("version");
 			return;
 		}
-		check(rev.version.base, "version.base", aQute.lib.osgi.Verifier.VERSION);
+		check(rev.version.base, "version.base", aQute.bnd.osgi.Verifier.VERSION);
 	}
 
 	private void check(String field, String name, Pattern pattern) {

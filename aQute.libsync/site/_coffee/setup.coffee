@@ -15,5 +15,9 @@ activate = ( $resource, $location, $routeParams ) ->
       'get': {method:'GET', params: {}},
       'rescan': {method:'OPTION', params:{cmd:'rescan'}}
     })
+    User = $resource('/rest/login',{}, {
+      'login': {method: 'GET', params:{email:@email,assertion:@assertion}},
+      'logout': {method: 'GET', params:{}},
+    })
     
 angular.module( 'jpm', ['ngResource'] ).config(routes).run( activate )

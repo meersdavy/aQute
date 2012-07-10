@@ -62,6 +62,8 @@ public class LibraryRestManager implements ResourceManager {
 
 	public Revision optionProgramRevision(OptionOptions opts, String bsn, String version) throws Exception {
 		// Authorize?
+		if (opts._user() == null)
+			throw new SecurityException("Not authorized to rescan");
 		return library.rescan(bsn, version);
 	}
 

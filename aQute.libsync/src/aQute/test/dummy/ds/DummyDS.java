@@ -6,8 +6,8 @@ import java.util.*;
 import java.util.regex.*;
 
 import aQute.bnd.make.component.*;
+import aQute.bnd.osgi.*;
 import aQute.lib.collections.*;
-import aQute.lib.osgi.*;
 
 /**
  * Intended to wire a number components for testing
