@@ -1,12 +1,20 @@
 <div class="ng-cloak">
 	<div>
 		<h2>
-			{{program._id}}</br><button ng-show="user" ng-click="startEdit()">Edit</button>
+			{{program._id}} 
+			{{state.current}}
+			<div ng-show="auth.permission('edit-program')">
+				<button ng-disabled="state.cannot('edit')" ng-click="state.edit()">Edit</button>
+				<button ng-disabled="state.cannot('save')"  ng-click="state.save()">Save</button>
+				<button ng-disabled="state.cannot('cancel')"   ng-click="state.cancel()">Cancel</button>
+			</div>
 		</h2>
 		<table style="width: 100%">
 			<tr>
-				<td class="label">Description <input type="text" ng-model="program.description"/></td>
-				<td><div id="epiceditor" ng-model="program.description" ee>{{program.description}}xxx</div></td>
+				<td class="label">Description</td>
+				<td id="program-description">
+					<div class="markdown" ng-model="program.description"  change='state.changed()' editable="auth.permission('edit-program') && state.can('changed')" ></div>
+				</td>
 			</tr>
 			<tr>
 				<td class="label">Vendor</td>
@@ -22,8 +30,9 @@
 			</tr>
 			<tr>
 				<td class="label">Revisions</td>
-				<td><a class="{{type(ref)}}" ng-repeat="ref in program.revisions"
-			href="#/p/{{program._id}}/r/{{ref.version.base}}">{{ref.version.base}}</a></td>
+				<td><a class="{{type(ref)}}"
+					ng-repeat="ref in program.revisions"
+					href="#/p/{{program._id}}/r/{{ref.version.base}}">{{ref.version.base}}</a></td>
 			</tr>
 		</table>
 		<p></p>
@@ -37,11 +46,13 @@
 			class="stackoverflow"> </a>
 		<div style="clear: both" />
 	</div>
-	<div style="clear:both;" ng-hide="!revision.version.base">
-		<hr/>
-		<h3><img class="icon"
-				ng-src="{{icon(revision.icon)}}" /><a class="{{type(revision)}}" >{{revision.version.base }}</a></h3> 
-		<button ng-hide="revision.master || !user" ng-click="rescan()">Rescan</button>
+	<div style="clear: both;" ng-hide="!revision.version.base">
+		<hr />
+		<h3>
+			<img class="icon" ng-src="{{icon(revision.icon)}}" /><a
+				class="{{type(revision)}}">{{revision.version.base }}</a>
+		</h3>
+		<button ng-show="auth.permission('rescan') && state.can('rescan')" ng-click="state.rescan()">Rescan</button>
 		<table style="width: 100%">
 			<tr>
 				<td class="label">Description</td>

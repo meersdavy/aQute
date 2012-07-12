@@ -22,26 +22,24 @@ activate = ( $resource, $location, $routeParams ) ->
     
 JPMApp = angular.module( 'jpm', ['ngResource'] ).config(routes).run( activate )
 
-f = () ->
-    alert(1)
-    return (scope,element,attrs) ->
-        alert(2) 
-        editor=new EpicEditor({container: element.id, file: {defaultContent: 'edit me ...', autoSave: 1000}}).load()
-        scope.$watch(attrs.ngModel, (value) -> editor.importFile('x', value))
-        editor.on('save', () -> scope.program.description = editor.exportFile(); scope.$apply() );
-        
-JPMApp.directive('ee', () -> {
-     restrict: 'A', 
-     require: 'ngModel', 
-     link: (scope, element, attrs, ngModel) ->
-          editor = new EpicEditor({container: element.id, file: {autoSave:1000} }).load()
-          editor.preview();
-          read = () -> ngModel.$setViewValue(editor.exportFile())
-          ngModel.$render = () -> editor.importFile('x', ngModel.$viewValue || '')
-          editor.on('save', () -> scope.$apply(read) )
-          skip = true
-          read(); 
-     })
-      
-      
 
+converter = new Markdown.Converter().makeHtml;
+
+JPMApp.directive('markdown', () -> {
+     restrict: 			'C', 
+     require: 			'ngModel',
+     transclude: 		true,
+     replace: 			true,
+     scope: 			{ model:'=ngModel', editable:'=editable', change:'@change' },
+     template: 			"""
+	<div>
+		<textarea ng-show="editable" ng-model="model" ng-transclude></textarea>
+		<div class="markdown-body" ng-transclude></div>
+	</div>
+	""",
+     link: 				(scope, element, attrs, ngModel) ->
+          markdown = element.find("div")          
+          textarea = element.find("textarea")
+          textarea.bind('keyup', (() -> element.parent().scope().$apply(scope.change))  )          
+          scope.$watch( 'model', () -> markdown.html( converter( scope.model || 'TBD')))
+     })

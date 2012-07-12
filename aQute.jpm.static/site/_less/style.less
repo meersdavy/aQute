@@ -249,9 +249,6 @@ table {
 .email { .share_icon; background-image: url(/img/email-24x24.png);}
 
 /* JPM specific layout */
-#navreserve {
-	margin-top: 80px;
-}
 
 // Specific for our pages.
 #page {
@@ -259,9 +256,17 @@ table {
 	.fill(white);
 	min-height: 800px;
 	margin-bottom: 20px;
+	margin-top: 80px;
 }
 
-
+#errors {
+	border: 1px solid red;
+	min-height: 200px;
+	width: 400px;
+	position:fixed;
+	top:80px;
+	left:10px;
+}
 #external {
 	clear: both;
 	.container(9);
@@ -302,6 +307,10 @@ table {
 	padding-bottom: 10px;
 }
 
+[markdown] textarea {
+	width:100%;
+	min-height: 400px;
+}
 table {
 	margin-top: 12px;
 	padding-top: 20px;
@@ -394,4 +403,18 @@ input {
 .qualifier {
 	font-weight: normal;
 	font-style:italic;
+}
+
+.md-preview {
+	width: 100%;
+}
+.md-edit {
+	width: 100%;
+}
+
+.markdown {
+	textarea {
+		width: 100%;
+	    min-height: 300px;
+	}
 }

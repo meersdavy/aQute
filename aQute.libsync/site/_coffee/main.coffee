@@ -7,26 +7,72 @@ Program 	= undefined		# shared resource manager for programs
 Revision 	= undefined		# shared resource manager for revisions
 User 	    = undefined		# User management
 
+class Log
+   log   : []
+   report: (title, error, severity ) -> this.log.push( { title: title, error: error, severity: severity } )
+   clear : -> this.log = []
+   hasErrors: -> this.log.length
+
 
 window.JPM = ($scope, $location, $routeParams) ->
     window.title = "JPM"
+    assertion = null
+    auth = StateMachine.create({
+       initial: 'init',
+       events: [
+          { name: 'done',         from: 'init',           to: 'viewing' },
+          { name: 'collect',      from: 'viewing',        to: 'collecting' },
+          { name: 'verify',       from: 'collecting',     to: 'verifying' },
+          { name: 'login',        from: 'init', 		  to: 'authenticated' },
+          { name: 'login',        from: 'verifying',      to: 'authenticated' },
+          
+          { name: 'logout',       from: 'authenticated',  to: 'viewing' },
+          { name: 'failed',       from: ['collecting', 'verifying'], to: 'viewing' },
+          { name: 'cancel',       from: ['collecting', 'verifying'], to: 'viewing' },
+       ],
+       callbacks: {
+          oncollecting: () ->
+              navigator.id.get( (assertion) -> 
+                  if assertion 
+                      $scope.assertion = assertion
+                      auth.verify()
+                  else
+                      auth.failed()
+              )
+
+          onverifying: () ->
+              $scope.user = User.login({assertion:$scope.assertion,email:''}, 
+                  (() -> auth.login()), (() -> auth.failed()) )
+                                          
+          onenterauthenticated:  () -> 
+              sessionStorage.user=angular.toJson($scope.user)
+          
+          onleaveauthenticated: () -> 
+              $scope.user = null
+              sessionStorage.user=null
+              navigator.id.logout()
+
+       }
+    });
+    $scope.auth = auth
     #
     #  User/login/logout
     #
-    $scope.user 	= angular.fromJson( sessionStorage.user || null )
-    $scope.login 	= () -> navigator.id.get(gotAssertion)    
-    $scope.logout 	= () -> $scope.user = null; sessionStorage.user=null; navigator.id.logout()
+    if sessionStorage.user
+        window.console.log("auto login from previous session = " + sessionStorage.user )
+        $scope.user = angular.fromJson( sessionStorage.user)
+        if ( !($scope.user && $scope.user.email)) 
+            $scope.user = null;
+            $scope.auth.done();
+        else 
+            $scope.auth.login()
     
-    #
-    # Callback from browserid
-    #
-    gotAssertion = (assertion) -> 
-        $scope.user = User.login({assertion:assertion,email:''}, 
-            (user) -> sessionStorage.user = angular.toJson(user))
+    # called from window when needs to login
+    $scope.escape   = (s) -> encodeURIComponent(s)
+    $scope.auth.permission = (action) -> $scope.user # && user.roles.indexOf(action) > = 0 
 
-    $scope.email = -> aler(1); user.email
-    
-    $scope.escape = (s) -> encodeURIComponent(s)
+    # error handling
+    $scope.error = new Log
 	
 #
 # Searching
@@ -55,14 +101,49 @@ SearchCtl = ($scope, $location, $routeParams ) ->
 # See jpm/
 
 ProgramCtl = ($scope, $location, $routeParams ) ->
-    $scope.program 		= Program.get( $routeParams )
+    $scope.program = Program.get($routeParams)
     if ( $routeParams.rev )
         $scope.revision = Revision.get($routeParams)
     else
         $scope.revision = null
-    $scope.type   = (t) -> 'staged'
-    $scope.date   = (t) -> new Date(t).toString()
+    state = StateMachine.create({
+       initial: 'viewing',
+       events: [
+          { name: 'edit',         from: 'viewing',        to: 'editing' },
+          { name: 'changed',      from: 'editing',        to: 'dirty' },
+          { name: 'changed',      from: 'dirty',          to: 'dirty' },
+          { name: 'save',         from: 'dirty',          to: 'saving'  },
+          { name: 'cancel',       from: 'dirty',          to: 'aborting'  },
+          { name: 'cancel',       from: 'saving',         to: 'aborting' },
+          { name: 'restored',     from: 'aborting',       to: 'viewing' },
+          { name: 'fail',         from: 'aborting',       to: 'viewing' },
+          { name: 'fail',         from: 'saving',         to: 'aborting' },
+          { name: 'fail',         from: 'aborting',       to: 'viewing' },
+          { name: 'saved',        from: 'saving',         to: 'viewing' },
+          
+          { name: 'rescan',       from: 'viewing',        to: 'command' },
+          { name: 'fail',         from: 'command',        to: 'viewing' },
+          { name: 'done',         from: 'command',        to: 'viewing' },
+          { name: 'done',         from: 'failed',         to: 'viewing' },
+       ],
+       callbacks: {
+          onsaving:    () -> 
+              $scope.program.$save( 
+                  [], 
+                  () ->state.saved(), 
+                  (reason) ->
+                      $scope.error.report($scope.program._id, "saving")
+                      state.fail()
+              )
+          onaborting:  () -> 
+              $scope.program = Program.get( $routeParams, 
+                  () ->state.restored(),
+                  (what) -> 
+                      $scope.error.report($scope.program._id, "aborting")
+                      state.fail(); 
+              )
+          onrescan:    () -> $scope.revision.$rescan({bsn:$scope.revision.bsn,rev:$scope.revision.version.base}, (->state.done()), (->state.fail()))
+       }
+    })
+    $scope.state = state
     $scope.icon   = (i) -> i || '/img/default-icon.png'
-    $scope.rescan = ( ) -> $scope.revision.$rescan({bsn:$scope.revision.bsn,rev:$scope.revision.version.base}); 
-    $scope.startEdit   = ( ) -> $scope.editing = true
-    

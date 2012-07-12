@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="css/style.css" rel="stylesheet" />
 <link href="http://cdn.aloha-editor.org/current/css/aloha.css" rel="stylesheet" type="text/css" />
-<title>{{title}}</title>
+<title>JPM</title>
 </head>
 
 <body ng-controller="JPM">
@@ -17,23 +17,34 @@
 				<!-- Reserved for logo --> <a id="logo" href="index.html">&#160;</a>
 			</li>
 			<li><a href="#/doc/install">Install</a></li>
-			<li><a href="#/doc/about">About</a></li>
+			<li><a href="#/doc/about">{{auth.current}}</a></li>
 			<li id="search"><input type='text' ng-model="query" /> <a
 				ng-href="#/?q={{escape(query)}}" ng-disabled="!query">Go</a></li>
 			<li>
 				<div class="ng-cloak">
-					<span ng-show="user"> <img class="user"
-						ng-src="/rest/gravatar/{{user.email}}?s=16" /> {{user.email}} <a
-						ng-click="logout()">Logout</a>
-					</span> <span ng-hide="user"> <a ng-click="login()">Login</a>
-					</span>
+					<div ng-show="auth.can('logout')"> 
+						<img class="user" ng-src="/rest/gravatar/{{user.email}}?s=16" /> 
+						{{user.email}} 
+						<button ng-click="auth.logout()">Logout</button>
+					</div> 
+					<button ng-show="auth.can('collect')" ng-click="auth.collect()">Login</button>
+					<button ng-show="auth.can('cancel')" ng-click="auth.cancel()">Cancel login</button>
 				</div>
 			</li>
 		</ul>
 	</div>
-	<div id="navreserve"></div>
 
+    <div id="errors" ng-show="error.hasErrors()">
+    	<table>
+    		<tr ng-repeat="e in error.log" class="{{e.severity}}">
+    			<td>{{e.title}}</td>
+    			<td>{{e.error}}</td>
+    		</tr>
+    	</table>
+    	<button ng-click="error.clear()">Clear</button>
+    </div>
 	<div id="page">
+	{{errors}}
 		<div id="external">
 			<div id="main">
 				<div ng-view=""></div>
@@ -85,7 +96,8 @@
 	</div>
 
 	<script src="https://browserid.org/include.js" type="text/javascript"></script>
-	<script src="js/epiceditor.js" type="text/javascript"></script>
+	<script src="js/state-machine.js" type="text/javascript"></script>
+	<script src="js/markdown.js" type="text/javascript"></script>
 	<script src="js/angular-1.0.0.js" type="text/javascript"></script>
 	<script src="js/angular-resource-1.0.0.js" type="text/javascript"></script>
 	<script src="js/jpm.js" type="text/javascript"></script>
