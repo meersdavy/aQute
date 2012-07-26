@@ -1,0 +1,17 @@
+
+Conditional-Package: !aQute.lib.osgi, aQute.lib*
+-buildpath: biz.aQute.bndlib;version=2.0.0,\
+	aQute.wrappers.jdbm;version=2.4.0,\
+	com.springsource.javax.servlet,\
+	org.osgi.impl.bundle.bindex2.lib;version=0.0.1,\
+	bndtools.runtime.junit;version=0.0.2,\
+	aQute.dstest;version=latest,\
+	aQute.mongo;version=latest,\
+	osgi.cmpn;version=4.2.1,\
+	aQute.github;version=latest,\
+	aQute.data;version=latest,\
+	aQute.filecache;version=latest,\
+	aQute.services;version=latest,\
+	org.mockito.mockito-all,\
+	aQute.logger;version=latest
+-sub: *.bnd

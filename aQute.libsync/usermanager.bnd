@@ -1,4 +1,0 @@
-Service-Component: *
-Private-Package: aQute.impl.user
-Export-Package: aQute.service.user
-Conditional-Package: aQute.lib*

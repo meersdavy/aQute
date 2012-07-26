@@ -1,3 +1,6 @@
 Service-Component: *
 Include-Resource: static/=static
 Private-Package: aQute.impl.browserid
+-buildpath: biz.aQute.bndlib;version=2.0.0,\
+	aQute.services;version=latest
+Conditional-Package: aQute.lib*

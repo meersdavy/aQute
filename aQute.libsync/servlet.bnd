@@ -1,3 +1,0 @@
-Private-Package: aQute.ma.servlet
-Service-Component: *
-Conditional-Package: aQute.lib*

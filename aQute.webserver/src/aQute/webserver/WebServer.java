@@ -2,8 +2,10 @@ package aQute.webserver;
 
 import java.io.*;
 import java.net.*;
+import java.nio.channels.*;
 import java.text.*;
 import java.util.*;
+import java.util.regex.*;
 import java.util.zip.*;
 
 import javax.servlet.*;
@@ -23,11 +25,83 @@ import aQute.webserver.WebServer.Config;
 
 @Component(provide = {}, configurationPolicy = ConfigurationPolicy.optional, immediate = true, designateFactory = Config.class)
 public class WebServer extends HttpServlet {
+	static String				BYTE_RANGE_SET_S	= "(\\d+)?\\s*-\\s*(\\d+)?";
+	static Pattern				BYTE_RANGE_SET		= Pattern.compile(BYTE_RANGE_SET_S);
+	static Pattern				BYTE_RANGE			= Pattern.compile("bytes\\s*=\\s*(" + BYTE_RANGE_SET_S
+															+ "(\\s*,\\s*" + BYTE_RANGE_SET_S + "))\\s*");
 	private static final long	serialVersionUID	= 1L;
 	static SimpleDateFormat		format				= new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 	Map<String,Cache>			cached				= new HashMap<String,Cache>();
 	File						cache;
 	LogService					log;
+
+	static class Range {
+		Range	next;
+		long	start;
+		long	end;
+
+		public long length() {
+			if (next == null)
+				return end - start;
+
+			return next.length() + end - start;
+		}
+
+		Range(String range, long length) {
+			if (range != null) {
+				if (!BYTE_RANGE.matcher(range).matches())
+					throw new IllegalArgumentException("Bytes ranges does not match specification " + range);
+
+				Matcher m = BYTE_RANGE_SET.matcher(range);
+				m.find();
+				init(m, length);
+			} else {
+				start = 0;
+				end = length;
+			}
+		}
+
+		private Range() {}
+
+		void init(Matcher m, long length) {
+			String s = m.group(1);
+			String e = m.group(2);
+			if (s == null && e == null)
+				throw new IllegalArgumentException("Invalid range, both begin and end not specified: " + m.group(0));
+
+			if (s == null) { // -n == l-n -> l
+				start = length - Long.parseLong(e);
+				end = length - 1;
+			} else if (e == null) { // n- == n -> l
+				start = Long.parseLong(s);
+				end = length - 1;
+			} else {
+				start = Long.parseLong(s);
+				end = Long.parseLong(e);
+			}
+			end++; // e is specified as inclusive, Java uses exclusive
+
+			if (end > length)
+				end = length;
+
+			if (start < 0)
+				start = 0;
+
+			if (start >= end)
+				throw new IllegalArgumentException("Invalid range, start higher than end " + m.group(0));
+
+			if (m.find()) {
+				next = new Range();
+				next.init(m, length);
+			}
+		}
+
+		void copy(FileChannel from, WritableByteChannel to) throws IOException {
+			from.transferTo(start, end, to);
+			if (next != null)
+				next.copy(from, to);
+		}
+	}
 
 	class Cache {
 		long	time;
@@ -96,7 +170,7 @@ public class WebServer extends HttpServlet {
 		if (alias == null || alias.isEmpty())
 			alias = "/";
 
-		this.http.registerServlet(config.alias(), this, null, null);
+		this.http.registerServlet(alias, this, null, null);
 		this.cache = context.getDataFile("cache");
 		cache.mkdir();
 
@@ -108,22 +182,6 @@ public class WebServer extends HttpServlet {
 			}
 		};
 		tracker.open();
-	}
-
-	@Deactivate
-	void deactivate() {
-		tracker.close();
-		http.unregister(config.alias());
-	}
-
-	@Reference
-	void setHttp(HttpService http) throws NamespaceException {
-		this.http = http;
-	}
-
-	@Reference
-	void setLog(LogService log) throws NamespaceException {
-		this.log = log;
 	}
 
 	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -155,7 +213,15 @@ public class WebServer extends HttpServlet {
 
 			rsp.setDateHeader("Last-Modified", c.time);
 			rsp.setHeader("Etag", c.etag);
-			rsp.setContentLength((int) c.file.length());
+			rsp.setHeader("Allow", "GET, HEAD");
+			rsp.setHeader("Accept-Ranges", "bytes");
+
+			Range range = new Range(rq.getHeader("Range"), c.file.length());
+			long length = range.length();
+			if (length >= Integer.MAX_VALUE)
+				throw new IllegalArgumentException("Range to read is too high: " + length);
+
+			rsp.setContentLength((int) range.length());
 
 			if (config.expires() != 0) {
 				Date expires = new Date(System.currentTimeMillis() + 60000 * config.expires());
@@ -186,8 +252,6 @@ public class WebServer extends HttpServlet {
 				rsp.setStatus(HttpServletResponse.SC_OK);
 
 			if (rq.getMethod().equalsIgnoreCase("GET")) {
-				InputStream in = new FileInputStream(c.file);
-
 				String acceptEncoding = rq.getHeader("Accept-Encoding");
 				boolean deflate = acceptEncoding != null && acceptEncoding.indexOf("deflate") >= 0;
 				OutputStream out = rsp.getOutputStream();
@@ -195,7 +259,16 @@ public class WebServer extends HttpServlet {
 					out = new DeflaterOutputStream(out);
 					rsp.setHeader("Content-Encoding", "deflate");
 				}
-				IO.copy(in, out);
+
+				FileInputStream file = new FileInputStream(c.file);
+				try {
+					FileChannel from = file.getChannel();
+					WritableByteChannel to = Channels.newChannel(out);
+					range.copy(from, to);
+				}
+				finally {
+					file.close();
+				}
 				out.close();
 			}
 		}
@@ -280,5 +353,21 @@ public class WebServer extends HttpServlet {
 	public String getMimeType(String name) {
 		// TODO
 		return null;
+	}
+
+	@Deactivate
+	void deactivate() {
+		tracker.close();
+		http.unregister(config.alias());
+	}
+
+	@Reference
+	void setHttp(HttpService http) throws NamespaceException {
+		this.http = http;
+	}
+
+	@Reference
+	void setLog(LogService log) throws NamespaceException {
+		this.log = log;
 	}
 }

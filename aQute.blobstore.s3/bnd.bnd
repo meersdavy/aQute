@@ -1,0 +1,18 @@
+Private-Package: aQute.impl.blobstore.s3,\
+	aQute.aws.s3
+-runbundles: osgi.cmpn,\
+	org.apache.felix.scr,\
+	org.apache.felix.shell,\
+	org.apache.felix.shell.tui
+Service-Component: *
+-runfw: org.apache.felix.framework
+-buildpath: osgi.core,\
+	osgi.cmpn,\
+	junit.osgi,\
+	aQute.services;version=latest,\
+	aQute.aws;version=latest,\
+	biz.aQute.bndlib;version=2.0.0,\
+	aQute.dstest;version=latest
+	
+Conditional-Package: aQute.lib*
+Export-Package: aQute.service.blobstore;provide:=true

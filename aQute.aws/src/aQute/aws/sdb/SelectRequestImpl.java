@@ -85,7 +85,6 @@ public class SelectRequestImpl<T> implements SelectRequest<T> {
 
 	private String format(String where, Object... args) {
 		StringBuilder sb = new StringBuilder();
-		int n = 0;
 
 		for (int i = 0; i < where.length(); i++) {
 			char c = where.charAt(i);

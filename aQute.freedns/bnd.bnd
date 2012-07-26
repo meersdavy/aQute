@@ -1,5 +1,4 @@
 Private-Package: aQute.impl.freedns,\
-	aQute.lib.io,\
 	aQute.bnd.annotation.metatype
 -runbundles: osgi.cmpn,\
 	org.apache.felix.scr,\
@@ -11,3 +10,4 @@ Service-Component: *
 	osgi.cmpn,\
 	junit.osgi,\
 	biz.aQute.bndlib;version=1.53.2
+Conditional-Package: aQute.lib*

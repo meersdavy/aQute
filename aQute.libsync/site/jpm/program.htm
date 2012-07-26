@@ -1,8 +1,6 @@
 <div class="ng-cloak">
 	<div>
-		<h2>
-			{{program._id}} 
-			{{state.current}}
+		<h2>{{program._id}}<img class="icon" ng-src="{{icon(program.icon)}}" />
 			<div ng-show="auth.permission('edit-program')">
 				<button ng-disabled="state.cannot('edit')" ng-click="state.edit()">Edit</button>
 				<button ng-disabled="state.cannot('save')"  ng-click="state.save()">Save</button>
@@ -13,20 +11,24 @@
 			<tr>
 				<td class="label">Description</td>
 				<td id="program-description">
-					<div class="markdown" ng-model="program.description"  change='state.changed()' editable="auth.permission('edit-program') && state.can('changed')" ></div>
+					<div class="markdown" ng-model="program.description"  change='state.changed()' editable="state.can('changed')" ></div>
 				</td>
 			</tr>
 			<tr>
 				<td class="label">Vendor</td>
-				<td>{{program.vendor}}</td>
+				<td><input type="text" ng-disabled="state.cannot('changed')" ng-model="program.vendor"></input></td>
 			</tr>
 			<tr>
 				<td class="label">Mailing list</td>
-				<td>{{program.mailingList}}</td>
+				<td><input type="text" ng-disabled="state.cannot('changed')" ng-model="program.mailingList"></input></td>
 			</tr>
 			<tr>
 				<td class="label">Source control</td>
-				<td>{{program.scm}}</td>
+				<td><input type="text" ng-disabled="state.cannot('changed')" ng-model="program.scm"></input></td>
+			</tr>
+			<tr>
+				<td class="label">Issues</td>
+				<td><input type="text" ng-disabled="state.cannot('changed')" ng-model="program.issues"></input></td>
 			</tr>
 			<tr>
 				<td class="label">Revisions</td>
@@ -47,16 +49,19 @@
 		<div style="clear: both" />
 	</div>
 	<div style="clear: both;" ng-hide="!revision.version.base">
-		<hr />
 		<h3>
 			<img class="icon" ng-src="{{icon(revision.icon)}}" /><a
 				class="{{type(revision)}}">{{revision.version.base }}</a>
+				
+			<div ng-show="auth.permission('manage-revision')">
+				<button ng-repeat="b in buttons()" ng-disabled="state.cannot(b)" ng-click="state[b]()">{{b}}</button>
+			</div>
+			
 		</h3>
-		<button ng-show="auth.permission('rescan') && state.can('rescan')" ng-click="state.rescan()">Rescan</button>
 		<table style="width: 100%">
 			<tr>
 				<td class="label">Description</td>
-				<td>{{revision.description}}</td>
+				<td>{{revision.description}} {{if(revision.master) [master]}}</td>
 			</tr>
 			<tr>
 				<td class="label">Qualifier</td>
@@ -130,6 +135,9 @@
 					class="developer" ng-src="/rest/gravatar/{{revision.owner}}?s=32" /></td>
 			</tr>
 		</table>
+		
+		Capabilities: {{revision.capabilities}}
+		Requirements: {{revision.requirements}}
 	</div>
 
 </div>

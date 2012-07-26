@@ -1,6 +1,0 @@
-Service-Component: *
-Conditional-Package: aQute.lib*
-Private-Package: aQute.impl.store.mongo,\
-	aQute.bnd.annotation.metatype,\
-	aQute.service.data
-Export-Package: aQute.service.store

@@ -1,0 +1,16 @@
+Private-Package: aQute.impl.filecache.simple
+-runbundles: osgi.cmpn,\
+	org.apache.felix.scr,\
+	org.apache.felix.shell,\
+	org.apache.felix.shell.tui
+Service-Component: *
+-runfw: org.apache.felix.framework
+-buildpath: osgi.core,\
+	osgi.cmpn,\
+	junit.osgi,\
+	aQute.dstest;version=latest,\
+	biz.aQute.bndlib;version=2.0.0,\
+	aQute.services;version=latest,\
+	org.mockito.mockito-all;version=1.9.0
+Export-Package: aQute.service.filecache;provide:=true
+Conditional-Package: aQute.lib*

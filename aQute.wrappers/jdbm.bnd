@@ -1,0 +1,3 @@
+-classpath: jar/jdbm-2.4.jar
+Export-Package: jdbm.*;version=1.0
+Bundle-Version: 2.4.0

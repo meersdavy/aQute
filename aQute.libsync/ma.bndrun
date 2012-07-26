@@ -1,38 +1,39 @@
--runfw: org.apache.felix.framework;version='[4.0.2,4.0.2]'
+-runfw: org.apache.felix.framework;version='[4.0.3,5)'
+-runtrace: false
 
 -runbundles: org.apache.felix.shell,\
 	org.apache.felix.shell.tui,\
-	org.apache.felix.scr,\
+	org.apache.felix.scr;version=1.6,\
 	org.apache.felix.http.jetty,\
 	org.apache.felix.configadmin,\
 	org.apache.felix.metatype,\
 	org.apache.felix.log,\
 	org.apache.felix.webconsole,\
 	com.mongodb;version=2.7.3,\
-	aQute.libsync.mongo;version=latest,\
+	aQute.aws;version=latest,\
+	aQute.mongo;version=latest,\
 	aQute.timer;version=latest,\
-	aQute.libsync.github;version=latest,\
+	aQute.github;version=latest,\
 	org.apache.felix.http.whiteboard,\
 	aQute.executor;version=latest,\
 	aQute.xray.plugin;version=latest,\
-	aQute.libsync.githubposthook;version=latest,\
-	aQute.libsync.library;version=latest,\
+	aQute.library;version=latest,\
 	aQute.webserver;version=latest,\
 	aQute.freedns;version=latest,\
-	aQute.libsync.rest;version=latest,\
-	aQute.libsync.configurer;version=latest,\
-	aQute.libsync.s3.blobstore;version=latest,\
+	aQute.rest;version=latest,\
+	aQute.configurer;version=latest,\
+	aQute.blobstore.s3;version=latest,\
 	org.eclipse.equinox.coordinator;version=1.1.0,\
 	org.eclipse.equinox.supplement;version=1.3.0,\
-	aQute.libsync.filecache.simple;version=latest,\
+	aQute.filecache;version=latest,\
 	biz.aQute.bndlib;version=2.0.0,\
-	aQute.libsync.email.ses;version=latest,\
-	aQute.libsync.gravatar;version=latest,\
-	aQute.libsync.angular;version=latest,\
-	aQute.libsync.data;version=latest,\
-	aQute.libsync.usermanager;version=latest,\
-	aQute.libsync.browserid;version=latest,\
-	aQute.epiceditor;version=latest
+	aQute.email.ses;version=latest,\
+	aQute.gravatar;version=latest,\
+	aQute.data;version=latest,\
+	aQute.user;version=latest,\
+	aQute.browserid;version=latest,\
+	org.osgi.impl.bundle.bindex2.lib;version=0.0.1,\
+	aQute.logger;version=latest
 
 -runproperties: felix.cm.dir=/var/cm,\
 	org.osgi.framework.system.packages.extra=javax.management,\
@@ -84,7 +85,7 @@ JPM-Service: ma;jvmargs="-Xmn100M -Xms500M -Xmx500M"
       "alias":						"/", \
       "bundles":					false \
    },{ \
-      "[debug]db":					"test", \
+      "[debug]db":					"production", \
       "[exec]db":					"jpm4j", \
       "service.factoryPid":			"aQute.impl.store.mongo.MongoDBImpl", \
       "host":						"", \
@@ -101,13 +102,25 @@ JPM-Service: ma;jvmargs="-Xmn100M -Xms500M -Xmx500M"
 	}, { \
       "service.pid":				"aQute.impl.filecache.simple.SimpleFileCacheImpl", \
 	}, { \
-	  "service.pid":                 "EmailService", \
-      "service.factoryPid":          "aQute.impl.email.ses.EmailImpl", \
+	  "service.pid":                "EmailService", \
+      "service.factoryPid":         "aQute.impl.email.ses.EmailImpl", \
       ".awsSecret": 				"@{.awsSecret}", \
       ".awsId": 					"@{.awsId}", \
     }, { \
-	  "service.pid":                 "org.apache.felix.webconsole.internal.servlet.OsgiManager", \
+	  "service.pid":                "org.apache.felix.webconsole.internal.servlet.OsgiManager", \
       "username":                   "admin", \
       "password":                   "@{.console.password}" \
+    }, { \
+	  "service.pid":                 "Obr Indexer", \
+	  "service.factoryPid":          "aQute.impl.indexer.obr.ObrWorker" \
+    }, { \
+	  "service.pid":                 "Library", \
+	  "service.factoryPid":          "aQute.impl.library.LibraryImpl", \
+	  "processes":                   ["obr"], \
+	  "trace":                       true \
+    }, { \
+	  "service.pid":                 "Logger", \
+	  "service.factoryPid":          "aQute.impl.logger.LoggerImpl", \
+	  "logType":                     "CONSOLE" \
     } \
 ]'

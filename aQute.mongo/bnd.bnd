@@ -1,0 +1,13 @@
+-buildpath: biz.aQute.bndlib;version=2.0.0,\
+	osgi.cmpn;version=4.2.1,\
+	com.mongodb;version=2.7.3,\
+	osgi.core;version=4.2.1,\
+	bndtools.runtime.junit;version=0.0.2,\
+	aQute.dstest;version=latest,\
+	aQute.services;version=latest,\
+	aQute.data;version=latest
+Private-Package: aQute.impl.store.mongo,\
+	aQute.bnd.annotation.metatype
+Conditional-Package: aQute.lib*
+Export-Package: aQute.service.store;provide:=true
+Service-Component: *

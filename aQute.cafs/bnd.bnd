@@ -1,0 +1,17 @@
+Private-Package: aQute.impl.cafs
+-runbundles: osgi.cmpn,\
+	org.apache.felix.scr,\
+	org.apache.felix.shell,\
+	org.apache.felix.shell.tui
+Service-Component: *
+-runfw: org.apache.felix.framework
+-buildpath: osgi.core,\
+	osgi.cmpn,\
+	junit.osgi,\
+	biz.aQute.bndlib;version=2.0.0,\
+	aQute.services;version=latest,\
+	aQute.dstest;version=latest
+Export-Package: aQute.service.cafs;provide:=true,\
+	aQute.service.cafs.data;provide:=true
+	
+Conditional-Package: aQute.lib*

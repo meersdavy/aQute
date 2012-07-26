@@ -4,7 +4,7 @@
 
 		<tr>
 			<td class="label">Search</td>
-			<td><input type='text' ng-model="query" required />
+			<td><input type='text' ng-model="query" required ng_change="search()"/>
 				<button ng-click="search()" ng-disabled="!query">Go</button></td>
 		</tr>
 	</table>
@@ -19,6 +19,6 @@
 <table>
 	<tr ng-repeat="p in programs">
 		<td class="label"><a href="#/p/{{p._id}}/r/{{p.revisions[0].version.base}}?">{{p._id}}</a></td>
-		<td>{{p.description || p.revisions[0]}}</td>
+		<td>{{p.description}} <span ng-repeat="r in p.revisions">{{r.version.base}} </span></td>
 	</tr>
 </table>

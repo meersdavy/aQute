@@ -5,7 +5,7 @@ Private-Package: aQute.lib.converter,\
 	aQute.lib.json,\
 	aQute.lib.base64,\
 	aQute.lib.collections
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1
 Import-Package: org.apache.felix.scr;resolution:=optional,\
 	org.osgi.service.log;resolution:=optional,\
 	org.osgi.service.cm;resolution:=optional, \

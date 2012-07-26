@@ -1,0 +1,10 @@
+-buildpath: biz.aQute.bndlib;version=2.0.0,\
+	osgi.cmpn;version=4.2.1,\
+	aQute.services;version=latest,\
+	osgi.core;version=4.2.1,\
+	com.springsource.javax.servlet;version=2.5.0
+Private-Package: aQute.impl.configurer,\
+	aQute.config.export
+Export-Package: aQute.service.init;provide:=true
+Conditional-Package: aQute.lib*
+Service-Component: *

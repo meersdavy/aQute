@@ -1,3 +1,0 @@
-Private-Package: aQute.impl.hazelcast,\
-	aQute.bnd.annotation.metatype
-Service-Component: *

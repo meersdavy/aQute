@@ -1,5 +1,6 @@
 routes 	= ($routeProvider) -> 
      $routeProvider.
+       when('/admin',  			{ templateUrl: '/jpm/admin.htm', 	controller: AdminCtl }).
        when('/p/:bsn/r/:rev',	{ templateUrl: '/jpm/program.htm', 	controller: ProgramCtl }).
        when('/p/:bsn',			{ templateUrl: '/jpm/program.htm', 	controller: ProgramCtl }).
        when('/',	  			{ templateUrl: '/jpm/search.htm', 	controller: SearchCtl }).
@@ -11,9 +12,11 @@ activate = ( $resource, $location, $routeParams ) ->
       'get': {method:'GET', params: {}},
       'query': {method: 'GET', params:{query:@query,start:@start,limit:PAGE_SIZE}, isArray:true}
     })
-    Revision = $resource('/rest/program/:bsn/revision/:rev',{}, {
+    Revision = $resource('/rest/program/:bsn/revision/:rev',{bsn:'@bsn', rev:'@version.base'}, {
       'get': {method:'GET', params: {}},
+      'query': {method: 'GET', params:{query:@query,start:@start,limit:PAGE_SIZE}, isArray:true}
       'rescan': {method:'OPTION', params:{cmd:'rescan'}}
+      'master': {method:'OPTION', params:{cmd:'master'}}
     })
     User = $resource('/rest/login',{}, {
       'login': {method: 'GET', params:{email:@email,assertion:@assertion}},

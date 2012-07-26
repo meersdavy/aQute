@@ -1,3 +1,0 @@
-Private-Package: aQute.impl.browserid
-Service-Component: *
-Conditional-Package: aQute.lib*

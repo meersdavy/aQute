@@ -21,6 +21,8 @@ window.JPM = ($scope, $location, $routeParams) ->
        initial: 'init',
        events: [
           { name: 'done',         from: 'init',           to: 'viewing' },
+          { name: 'done',         from: 'viewing',        to: 'viewing' },
+          { name: 'done',         from: 'authenticated',  to: 'authenticated' },
           { name: 'collect',      from: 'viewing',        to: 'collecting' },
           { name: 'verify',       from: 'collecting',     to: 'verifying' },
           { name: 'login',        from: 'init', 		  to: 'authenticated' },
@@ -55,6 +57,7 @@ window.JPM = ($scope, $location, $routeParams) ->
        }
     });
     $scope.auth = auth
+    
     #
     #  User/login/logout
     #
@@ -63,9 +66,10 @@ window.JPM = ($scope, $location, $routeParams) ->
         $scope.user = angular.fromJson( sessionStorage.user)
         if ( !($scope.user && $scope.user.email)) 
             $scope.user = null;
-            $scope.auth.done();
         else 
             $scope.auth.login()
+            
+    $scope.auth.done()
     
     # called from window when needs to login
     $scope.escape   = (s) -> encodeURIComponent(s)
@@ -113,6 +117,7 @@ ProgramCtl = ($scope, $location, $routeParams ) ->
           { name: 'changed',      from: 'editing',        to: 'dirty' },
           { name: 'changed',      from: 'dirty',          to: 'dirty' },
           { name: 'save',         from: 'dirty',          to: 'saving'  },
+          { name: 'cancel',       from: 'editing',        to: 'viewing'  },
           { name: 'cancel',       from: 'dirty',          to: 'aborting'  },
           { name: 'cancel',       from: 'saving',         to: 'aborting' },
           { name: 'restored',     from: 'aborting',       to: 'viewing' },
@@ -122,11 +127,13 @@ ProgramCtl = ($scope, $location, $routeParams ) ->
           { name: 'saved',        from: 'saving',         to: 'viewing' },
           
           { name: 'rescan',       from: 'viewing',        to: 'command' },
+          { name: 'master',       from: 'viewing',        to: 'command' },
           { name: 'fail',         from: 'command',        to: 'viewing' },
           { name: 'done',         from: 'command',        to: 'viewing' },
           { name: 'done',         from: 'failed',         to: 'viewing' },
        ],
        callbacks: {
+          onediting: () -> $scope.snapshot = angular.toJson($scope.program)
           onsaving:    () -> 
               $scope.program.$save( 
                   [], 
@@ -142,8 +149,10 @@ ProgramCtl = ($scope, $location, $routeParams ) ->
                       $scope.error.report($scope.program._id, "aborting")
                       state.fail(); 
               )
-          onrescan:    () -> $scope.revision.$rescan({bsn:$scope.revision.bsn,rev:$scope.revision.version.base}, (->state.done()), (->state.fail()))
+          onrescan:    () -> $scope.revision.$rescan((->state.done()), (->state.fail()))
+          onmaster:    () -> $scope.revision.$master((->state.done()), (->state.fail()))
        }
     })
     $scope.state = state
     $scope.icon   = (i) -> i || '/img/default-icon.png'
+    $scope.buttons = -> ['rescan', 'master', 'cancel']

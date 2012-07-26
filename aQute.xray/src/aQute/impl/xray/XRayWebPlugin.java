@@ -1,6 +1,7 @@
 package aQute.impl.xray;
 
 import java.io.*;
+import java.lang.reflect.*;
 import java.net.*;
 import java.util.*;
 import java.util.regex.*;
@@ -536,8 +537,24 @@ public final class XRayWebPlugin extends AbstractWebConsolePlugin {
 			if (entry.getBundle() == bundle) {
 				if (entry.getTime() + 2 * 60 * 1000 > System.currentTimeMillis()) {
 					if (entry.getLevel() <= LogService.LOG_WARNING) {
-						f.format("%s:%s %s\n", entry.getLevel() == LogService.LOG_WARNING ? "W" : "E", entry
-								.getMessage(), (entry.getException() == null ? "" : entry.getException().getMessage()));
+						String message = "";
+						if (entry.getException() != null) {
+							StringWriter sw = new StringWriter();
+							PrintWriter pw = new PrintWriter(sw);
+
+							Throwable t = entry.getException();
+							while (t instanceof InvocationTargetException) {
+								pw.println(t.getMessage());
+								t = ((InvocationTargetException) t).getTargetException();
+							}
+
+							pw.println(t.getMessage());
+							t.printStackTrace(pw);
+							pw.flush();
+							message = sw.toString();
+						}
+						f.format("%s:%s %s\n", entry.getLevel() == LogService.LOG_WARNING ? "W" : "E",
+								entry.getMessage(), message);
 						if (entry.getLevel() == LogService.LOG_WARNING)
 							bd.errors |= true;
 					}

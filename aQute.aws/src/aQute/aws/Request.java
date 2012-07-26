@@ -104,7 +104,14 @@ public abstract class Request {
 							"<?xml version='1.0'?><Error><Code>NO ERROR GIVEN</Code></Error>".getBytes());
 
 				String collect = IO.collect(in);
-				response = db.parse(new ByteArrayInputStream(collect.getBytes("UTF-8")));
+				try {
+					ByteArrayInputStream bin = new ByteArrayInputStream(collect.getBytes("UTF-8"));
+					response = db.parse(bin);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					System.out.println(collect);
+				}
 			}
 		}
 		return response;

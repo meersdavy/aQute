@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="css/style.css" rel="stylesheet" />
-<link href="http://cdn.aloha-editor.org/current/css/aloha.css" rel="stylesheet" type="text/css" />
+<link href="http://cdn.aloha-editor.org/current/css/aloha.css"
+	rel="stylesheet" type="text/css" />
 <title>JPM</title>
 </head>
 
@@ -17,34 +18,34 @@
 				<!-- Reserved for logo --> <a id="logo" href="index.html">&#160;</a>
 			</li>
 			<li><a href="#/doc/install">Install</a></li>
-			<li><a href="#/doc/about">{{auth.current}}</a></li>
+			<li><a href="#/doc/about">About</a></li>
 			<li id="search"><input type='text' ng-model="query" /> <a
 				ng-href="#/?q={{escape(query)}}" ng-disabled="!query">Go</a></li>
 			<li>
 				<div class="ng-cloak">
-					<div ng-show="auth.can('logout')"> 
-						<img class="user" ng-src="/rest/gravatar/{{user.email}}?s=16" /> 
-						{{user.email}} 
+					<div ng-show="auth.can('logout')">
+						<img class="user" ng-src="/rest/gravatar/{{user.email}}?s=16" />
+						{{user.email}}
 						<button ng-click="auth.logout()">Logout</button>
-					</div> 
+					</div>
 					<button ng-show="auth.can('collect')" ng-click="auth.collect()">Login</button>
-					<button ng-show="auth.can('cancel')" ng-click="auth.cancel()">Cancel login</button>
+					<button ng-show="auth.can('cancel')" ng-click="auth.cancel()">Cancel
+						login</button>
 				</div>
 			</li>
 		</ul>
 	</div>
 
-    <div id="errors" ng-show="error.hasErrors()">
-    	<table>
-    		<tr ng-repeat="e in error.log" class="{{e.severity}}">
-    			<td>{{e.title}}</td>
-    			<td>{{e.error}}</td>
-    		</tr>
-    	</table>
-    	<button ng-click="error.clear()">Clear</button>
-    </div>
+	<div id="errors" ng-show="error.hasErrors()">
+		<table>
+			<tr ng-repeat="e in error.log" class="{{e.severity}}">
+				<td>{{e.title}}</td>
+				<td>{{e.error}}</td>
+			</tr>
+		</table>
+		<button ng-click="error.clear()">Clear</button>
+	</div>
 	<div id="page">
-	{{errors}}
 		<div id="external">
 			<div id="main">
 				<div ng-view=""></div>

@@ -246,7 +246,6 @@ public class DomainImpl<T> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	class CollectionFieldHandler extends FieldHandler {
 		final Type	memberType;
 
@@ -276,7 +275,6 @@ public class DomainImpl<T> {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	class MapFieldHandler extends FieldHandler {
 		final Type	keyType;
 		final Type	valueType;
@@ -349,41 +347,43 @@ public class DomainImpl<T> {
 			Map<Object,Object> map = (Map<Object,Object>) field.get(tuple);
 			if (map == null) {
 				// map = newMap(field.getType());
-			}
-			if (collectionType == null) {
-				Object value = toObject(valueType, v);
-				map.put(key, value);
 			} else {
-				Object value = toObject(collectionType, v);
-				Collection<Object> collection = (Collection<Object>) map.get(key);
-				if (collection == null) {
-					// map.put(key, newCollection(valueType));
+				if (collectionType == null) {
+					Object value = toObject(valueType, v);
+					map.put(key, value);
+				} else {
+					Object value = toObject(collectionType, v);
+					Collection<Object> collection = (Collection<Object>) map.get(key);
+					if (collection == null) {
+						// map.put(key, newCollection(valueType));
+					} else
+						collection.add(value);
 				}
-				collection.add(value);
 			}
 		}
 
 		public void updateSpecial(Request args, T updated) throws Exception {
-			Map< ? , ? > values = (Map< ? , ? >) field.get(updated);
+			// Map< ? , ? > values = (Map< ? , ? >) field.get(updated);
 
-			for (Map.Entry< ? , ? > entry : values.entrySet()) {
-				String key = asString(keyType, entry.getKey());
+			// for (Map.Entry< ? , ? > entry : values.entrySet()) {
+			// String key = asString(keyType, entry.getKey());
 
-				// TODO Check use of existing keys
+			// TODO Check use of existing keys
 
-				if (collectionType != null) {
-					// Handle multiple attrs
-					Collection< ? > members = (Collection< ? >) entry.getValue();
-					for (Object o : members) {
-						// args.addAttribute(key, asString(collectionType, o),
-						// true);
-					}
-				} else {
-					// Handle scalar
-					// args.addAttribute(key,
-					// asString(collectionType, entry.getValue()), true);
-				}
-			}
+			// if (collectionType != null) {
+			// Handle multiple attrs
+			// Collection< ? > members = (Collection< ? >)
+			// entry.getValue();
+			// for (Object o : members) {
+			// args.addAttribute(key, asString(collectionType, o),
+			// true);
+			// }
+			// } else {
+			// Handle scalar
+			// args.addAttribute(key,
+			// asString(collectionType, entry.getValue()), true);
+			// }
+			// }
 		}
 	}
 
@@ -410,7 +410,7 @@ public class DomainImpl<T> {
 
 		@Override
 		public void put(Request args, T updated) throws Exception {
-			Object array = field.get(updated);
+			// Object array = field.get(updated);
 			// for (int attribute = 0; attribute < Array.getLength(array);
 			// attribute++)
 			// args.addAttribute(name,

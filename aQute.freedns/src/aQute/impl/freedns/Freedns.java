@@ -39,10 +39,11 @@ public class Freedns {
 
 											String s = IO.collect(url.openStream());
 											log.log(LogService.LOG_INFO, s);
-
 										}
 										catch (Exception e) {
-											throw new RuntimeException(e);
+											log.log(LogService.LOG_ERROR,
+													"Pinging " + options.url() + " in " + options.period() + " "
+															+ options.key());
 										}
 									}
 

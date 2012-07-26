@@ -1,0 +1,12 @@
+-runbundles: osgi.cmpn,\
+	org.apache.felix.scr,\
+	org.apache.felix.shell,\
+	org.apache.felix.shell.tui
+Service-Component: *
+-runfw: org.apache.felix.framework
+-buildpath: osgi.core,\
+	osgi.cmpn,\
+	junit.osgi,\
+	biz.aQute.bndlib;version=2.0.0
+Export-Package: aQute.test.dummy.ds,\
+	aQute.test.dummy.log

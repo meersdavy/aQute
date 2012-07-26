@@ -1,0 +1,9 @@
+Conditional-Package: !aQute.lib.osgi, aQute.lib*
+Private-Package: aQute.impl.library,\
+	aQute.impl.library.rest,\
+	aQute.impl.metadata.osgi,\
+	aQute.impl.gitposthook,\
+	aQute.impl.gitposthook.servlet
+Service-Component: *
+Export-Package: aQute.service.library;provide:=true,\
+	aQute.service.osgimetadata;provide:=true

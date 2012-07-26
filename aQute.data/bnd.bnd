@@ -1,0 +1,5 @@
+-buildpath: biz.aQute.bndlib;version=2.0.0
+Export-Package: aQute.service.data,\
+	aQute.data.common,\
+	aQute.util.data
+Conditional-Package: aQute.lib*

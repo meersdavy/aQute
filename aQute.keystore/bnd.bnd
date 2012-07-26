@@ -8,5 +8,4 @@ Service-Component: *
 -buildpath: osgi.core,\
 	osgi.cmpn,\
 	junit.osgi,\
-	biz.aQute.bnd.annotation;version=1.52.3,\
-	aQute.osgi;version=latest
+	biz.aQute.bnd.annotation;version=1.52.3

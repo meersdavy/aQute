@@ -1,5 +1,4 @@
-Export-Package: test,\
-	aQute.aws,\
+Export-Package: aQute.aws,\
 	aQute.aws.credentials,\
 	aQute.aws.s3,\
 	aQute.aws.sdb,\

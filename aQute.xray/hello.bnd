@@ -1,2 +1,3 @@
 Private-Package: aQute.impl.minplugin
 Service-Component: *
+Bundle-Version: 1.0.0
