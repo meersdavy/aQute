@@ -17,7 +17,7 @@
 	org.apache.felix.http.whiteboard,\
 	aQute.executor;version=latest,\
 	aQute.xray.plugin;version=latest,\
-	aQute.library;version=latest,\
+	aQute.library.server;version=latest,\
 	aQute.webserver;version=latest,\
 	aQute.freedns;version=latest,\
 	aQute.rest;version=latest,\
@@ -89,14 +89,14 @@ JPM-Service: ma;jvmargs="-Xmn100M -Xms500M -Xmx500M"
       "[exec]db":					"jpm4j", \
       "service.factoryPid":			"aQute.impl.store.mongo.MongoDBImpl", \
       "host":						"", \
-      "[exec].password":			"jpm4j", \
-      "[exec]user":					"@{jpm4j.password}", \
+      "[exec].password":			"@{mongo.user}", \
+      "[exec]user":					"@{.mongo.secret}", \
       "service.pid":				"Db" \
    }, { \
       "service.factoryPid":			"aQute.impl.blobstore.s3.S3BlobStoreImpl", \
       "service.pid":				"JPMBucket", \
-      ".awsSecret": 				"@{.awsSecret}", \
-      ".awsId": 					"@{.awsId}", \
+      ".awsSecret": 				"@{.aws.secret}", \
+      ".awsId": 					"@{aws.user}", \
       "bucket": 					"jpm4j", \
       "storageClass": 				"REDUCED", \
 	}, { \
@@ -104,12 +104,12 @@ JPM-Service: ma;jvmargs="-Xmn100M -Xms500M -Xmx500M"
 	}, { \
 	  "service.pid":                "EmailService", \
       "service.factoryPid":         "aQute.impl.email.ses.EmailImpl", \
-      ".awsSecret": 				"@{.awsSecret}", \
-      ".awsId": 					"@{.awsId}", \
+      ".awsSecret": 				"@{.aws.secret}", \
+      ".awsId": 					"@{aws.user}", \
     }, { \
 	  "service.pid":                "org.apache.felix.webconsole.internal.servlet.OsgiManager", \
-      "username":                   "admin", \
-      "password":                   "@{.console.password}" \
+      "username":                   "@{console.user}", \
+      "password":                   "@{.console.secret}" \
     }, { \
 	  "service.pid":                 "Obr Indexer", \
 	  "service.factoryPid":          "aQute.impl.indexer.obr.ObrWorker" \

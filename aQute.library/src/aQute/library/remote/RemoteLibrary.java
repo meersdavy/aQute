@@ -1,4 +1,4 @@
-package aQute.impl.library.remote;
+package aQute.library.remote;
 
 import java.io.*;
 import java.net.*;

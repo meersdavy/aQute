@@ -13,7 +13,7 @@ Service-Component: *
 -buildpath: osgi.core,\
 	osgi.cmpn,\
 	biz.aQute.bnd.annotation,\
-	junit.osgi,\
-	biz.aQute.bndlib;version=1.52.2
+	biz.aQute.bndlib;version=1.52.2,\
+	junit.osgi;version=3.8.2
 	
 Conditional-Package: aQute.lib*

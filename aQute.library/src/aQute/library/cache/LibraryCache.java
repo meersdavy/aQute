@@ -1,4 +1,4 @@
-package aQute.impl.library.cache;
+package aQute.library.cache;
 
 import java.io.*;
 import java.util.*;
@@ -116,6 +116,7 @@ public class LibraryCache extends DB {
 	SecondaryTreeMap<String,String,Library.Revision>	bsnIndex;
 	State												state;
 	Executor											executor;
+	boolean												includeStaged;
 
 	/**
 	 * Maintains the state of the current cache. Deleting the corresponding file
@@ -135,11 +136,10 @@ public class LibraryCache extends DB {
 	 */
 
 	public LibraryCache(Library lib, File cacheDir) throws Exception {
-
 		this.library = lib;
 		if (cacheDir == null) {
 			File home = new File(System.getProperty("user.home"));
-			this.cache = IO.getFile(home, ".bnd/cache");
+			this.cache = IO.getFile(home, ".bnd/cached-repo");
 		} else
 			this.cache = cacheDir.getAbsoluteFile();
 
@@ -214,6 +214,10 @@ public class LibraryCache extends DB {
 		recman = null;
 		revisions = null;
 		bsnIndex = null;
+		TimerTask watcher = this.watcher;
+		if (watcher != null) {
+			watcher.cancel();
+		}
 	}
 
 	/**
@@ -282,6 +286,7 @@ public class LibraryCache extends DB {
 			boolean found;
 			do {
 				trace("beginning batch %s", BATCH_SIZE);
+				alive();
 				Find< ? extends Revision> find = library.findRevision().where("modified>=%s", begin)
 						.ascending("modified").skip(n).limit(BATCH_SIZE);
 				found = false;
@@ -415,7 +420,7 @@ public class LibraryCache extends DB {
 		try {
 			List<String> versions = new ArrayList<String>();
 			for (Revision r : bsnIndex.getPrimaryValues(bsn)) {
-				if (r.master)
+				if (r.master || includeStaged)
 					versions.add(r.version.base);
 			}
 			return versions;
@@ -426,6 +431,9 @@ public class LibraryCache extends DB {
 	}
 
 	public Future<File> getMaster(String bsn, String version) throws Exception {
+		if (includeStaged)
+			return getStaged(bsn, version);
+
 		File f = getFile(masters, bsn, version);
 		if (f.isFile())
 			return future(null, f);
@@ -482,15 +490,17 @@ public class LibraryCache extends DB {
 
 	private void download(Revision r, File base) throws Exception {
 		File tmp = new File(base.getAbsolutePath() + "-tmp.jar");
-
-		Closeable c = lock(r.bsn + "-" + r.version.base);
+		String id = r.bsn + "-" + r.version.base;
+		Closeable c = lock(id);
 		try {
+			trace("download lock %s", id);
 			// Check for the race condition that somebody beat us
 			if (base.isFile())
 				return;
 
 			base.delete();
 
+			trace("fetching %s:%s -> %s", id, r.url, tmp);
 			fetch(r, tmp);
 			if (!tmp.renameTo(base)) {
 				msgs.CouldNotRename(tmp, base);
@@ -501,6 +511,7 @@ public class LibraryCache extends DB {
 		}
 		finally {
 			c.close();
+			trace("released download lock %s", id);
 		}
 	}
 
@@ -582,6 +593,14 @@ public class LibraryCache extends DB {
 
 	public List<String> locks() {
 		return new ExtList<String>(locks.list());
+	}
+
+	/**
+	 * If the includeStaged is true, staged versions are included in versions()
+	 */
+
+	public void setIncludeStaged(boolean include) {
+		this.includeStaged = include;
 	}
 
 	/**

@@ -16,15 +16,14 @@ import aQute.service.github.*;
 import aQute.service.library.*;
 import aQute.service.library.Library.Revision;
 import aQute.service.logger.*;
-import aQute.service.task.*;
 
 /**
  * From IP addressses 207.97.227.253, 50.57.128.197, 108.171.174.178.
  */
 @Component(provide = {
-		Worker.class, GithubWorker.class
+	GithubWorker.class
 })
-public class GithubWorker implements Worker<Data.ImportData> {
+public class GithubWorker { // implements Worker<Data.ImportData> {
 
 	public static abstract class GithubImporter extends ReporterAdapter implements Runnable {
 

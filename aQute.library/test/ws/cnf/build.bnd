@@ -1,0 +1,4 @@
+
+
+-plugin: aQute.library.bnd.Repository;includeStaged=true;url='http://jpm4j.org:8080/rest/';path:=${workspace}/../../generated/aQute.library.bndrepo.jar 
+                                                                                                

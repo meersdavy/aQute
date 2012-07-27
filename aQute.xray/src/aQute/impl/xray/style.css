@@ -28,6 +28,12 @@
 	fill: lightgrey;
 }
 
+.STOPPING {
+	stroke: black;
+	stroke-width: 1px;
+	fill: red;
+}
+
 .INSTALLED {
 	stroke: black;
 	stroke-width: 1px;

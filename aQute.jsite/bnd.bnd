@@ -1,5 +1,6 @@
 -buildpath: com.github.rjeschke.txtmark;version=0.6.0,\
-	aQute.libg;version=2.7.2
+	aQute.libg;version=2.7.2,\
+	junit.osgi;version=3.8.2
 
 	
 Main-Class: aQute.jsite.main.JSite

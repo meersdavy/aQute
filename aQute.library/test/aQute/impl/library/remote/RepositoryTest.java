@@ -5,7 +5,7 @@ import java.util.*;
 import junit.framework.*;
 import aQute.bnd.service.RepositoryPlugin.Strategy;
 import aQute.bnd.version.*;
-import aQute.impl.library.bnd.*;
+import aQute.library.bnd.*;
 
 public class RepositoryTest extends TestCase {
 

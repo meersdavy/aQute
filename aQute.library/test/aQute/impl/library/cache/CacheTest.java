@@ -9,6 +9,7 @@ import aQute.bnd.annotation.component.*;
 import aQute.impl.library.*;
 import aQute.impl.metadata.osgi.*;
 import aQute.lib.io.*;
+import aQute.library.cache.*;
 import aQute.service.library.Library.Program;
 import aQute.service.library.Library.Revision;
 import aQute.test.dummy.ds.*;

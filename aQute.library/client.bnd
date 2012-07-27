@@ -1,7 +1,9 @@
-Private-Package: aQute.impl.library.cache,\
-	aQute.impl.library.remote,\
+Private-Package:\
 	jdbm,\
 	jdbm.helper,\
 	jdbm.recman
 Conditional-Package: aQute.lib*, jdbm.*
-Export-Package: aQute.service.library;provide:=true
+Export-Package: aQute.service.library;provide:=true,\
+	aQute.library.cache,\
+	aQute.library.command,\
+	aQute.library.remote

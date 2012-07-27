@@ -2,17 +2,15 @@ package test;
 
 import java.util.*;
 
-import org.junit.*;
-
+import junit.framework.*;
 import aQute.aws.*;
 import aQute.aws.credentials.*;
 import aQute.aws.sqs.*;
 
-public class SQSTest extends Assert {
+public class SQSTest extends TestCase {
 	UserCredentials	uc	= new UserCredentials();
 	AWS				aws;
 
-	@Test
 	public void test() throws Exception {
 		aws = new AWS(uc.getAWSAccessKeyId(), uc.getAWSSecretKey());
 
@@ -28,7 +26,6 @@ public class SQSTest extends Assert {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
 	public void queueLifeCycle() throws Exception {
 		aws = new AWS(uc.getAWSAccessKeyId(), uc.getAWSSecretKey());
 		SQS sqs = aws.sqs("http://sqs.us-east-1.amazonaws.com");

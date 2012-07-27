@@ -1,4 +1,4 @@
-package aQute.impl.library.bnd;
+package aQute.library.bnd;
 
 import java.io.*;
 import java.net.*;
@@ -7,11 +7,11 @@ import java.util.*;
 import aQute.bnd.osgi.*;
 import aQute.bnd.service.*;
 import aQute.bnd.version.*;
-import aQute.impl.library.cache.*;
-import aQute.impl.library.remote.*;
 import aQute.lib.collections.*;
 import aQute.lib.converter.*;
 import aQute.lib.io.*;
+import aQute.library.cache.*;
+import aQute.library.remote.*;
 import aQute.service.reporter.*;
 
 /**
@@ -20,11 +20,20 @@ import aQute.service.reporter.*;
 public class Repository implements RepositoryPlugin, Plugin, Closeable, Refreshable {
 	RemoteLibrary	library;
 	LibraryCache	cache;
+	File			dir	= null;
 
 	interface Options {
 		URI url();
 
 		String cacheDir();
+
+		boolean init();
+
+		boolean refresh();
+
+		boolean includeStaged();
+
+		String name();
 	}
 
 	Options		options;
@@ -63,11 +72,11 @@ public class Repository implements RepositoryPlugin, Plugin, Closeable, Refresha
 			if (options != null && options.url() != null)
 				library.url(options.url().toString());
 
-			File cacheDir = null;
+			File cacheDir = dir;
 			if (options != null && options.cacheDir() != null)
 				cacheDir = IO.getFile(options.cacheDir());
 			cache = new LibraryCache(library, cacheDir);
-			cache.open();
+			cache.setIncludeStaged(options.includeStaged());
 			return cache;
 		}
 		catch (Exception e) {
@@ -87,7 +96,7 @@ public class Repository implements RepositoryPlugin, Plugin, Closeable, Refresha
 
 	@Override
 	public List<String> list(String regex) throws Exception {
-		return new SortedList<String>(getCache().list(regex));
+		return new ArrayList<String>(getCache().list(regex));
 	}
 
 	@Override
@@ -97,7 +106,7 @@ public class Repository implements RepositoryPlugin, Plugin, Closeable, Refresha
 
 	@Override
 	public String getName() {
-		return getCache().toString();
+		return options.name() == null ? "JPM" : options.name();
 	}
 
 	@Override
@@ -136,7 +145,7 @@ public class Repository implements RepositoryPlugin, Plugin, Closeable, Refresha
 	@Override
 	public boolean refresh() {
 		try {
-			cache.synchronize();
+			getCache().synchronize();
 			return cache.isOk();
 		}
 		catch (Exception e) {
@@ -149,6 +158,11 @@ public class Repository implements RepositoryPlugin, Plugin, Closeable, Refresha
 
 	@Override
 	public File getRoot() {
-		return cache.getRoot();
+		return getCache().getRoot();
 	}
+
+	public void setCacheDir(File dir) {
+		this.dir = dir;
+	}
+
 }

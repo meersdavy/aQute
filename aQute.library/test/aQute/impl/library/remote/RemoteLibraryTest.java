@@ -4,8 +4,9 @@ import java.io.*;
 import java.util.*;
 
 import junit.framework.*;
-import aQute.impl.library.cache.*;
 import aQute.lib.io.*;
+import aQute.library.cache.*;
+import aQute.library.remote.*;
 import aQute.service.library.Library.Info;
 import aQute.service.library.Library.Program;
 import aQute.service.library.Library.Revision;
